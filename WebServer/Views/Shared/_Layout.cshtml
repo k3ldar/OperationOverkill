@@ -1,0 +1,68 @@
+﻿@using SharedPluginFeatures;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <title>@ViewData["Title"] - Op Overkill</title>
+</head>
+<body>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js" integrity="sha256-sPB0F50YUDK0otDnsfNHawYmA5M0pjjUf4TvRJkGFrI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.11/jquery.validate.unobtrusive.min.js" integrity="sha256-9GycpJnliUjJDVDqP0UEu/bsm9U+3dnQUH8+3W10vkY=" crossorigin="anonymous"></script>
+
+    <header class="mnuBar">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-blue border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" href="/">Operation Overkill</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="/Home/Index">@Languages.LanguageStrings.Home</a>
+                        </li>
+                        @{
+                            // dynamically add menu items from plugins
+                            ISharedPluginHelper sharedPluginHelper = (ISharedPluginHelper)Context.RequestServices.GetService(typeof(ISharedPluginHelper));
+                            foreach (MainMenuItem menuItem in sharedPluginHelper.BuildMainMenu())
+                            {
+                                <li class="nav-item"><a asp-area="@menuItem.Area()" asp-controller="@menuItem.Controller()" asp-action="@menuItem.Action()" class="nav-link text-light">@menuItem.Name()</a></li>
+                            }
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <script src="~/js/SystemAdmin.js"></script>
+
+    <div class="container">
+        <main role="main" class="pb-3 content">
+            <div class="row" style="margin: 8px 0 8px 0;">
+                <div class="col" style="background-color: #eee;">
+                    <div class="bc">@Html.Raw(Model.BreadcrumbData())</div>
+                </div>
+            </div>
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2023 - Si Carter
+        </div>
+    </footer>
+
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

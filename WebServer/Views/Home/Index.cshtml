@@ -1,0 +1,49 @@
+﻿@model OpOverkill.Models.IndexViewModel
+@{
+    ViewData["Title"] = Model.SeoTitle;
+}
+
+<div class="row">
+    <div class="col-sm-12">
+        <h3>Water Sensor Reading</h3>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">Pump 1 Active</div>
+    <div class="col"><span id="spPump1">@Model.Pump1Active</span></div>
+</div>
+<div class="row">
+    <div class="col">Pump 2 Active</div>
+    <div class="col"><span id="spPump2">@Model.Pump2Active</span></div>
+</div>
+<div class="row">
+    <div class="col">Sensor Value</div>
+    <div class="col"><span id="spSensor">@Model.SensorValue</span> / 400</div>
+</div>
+<div class="row">
+    <div class="col">Relay Count</div>
+    <div class="col"><span id="spRelay">@Model.RelayCount</span> / 3</div>
+</div>
+<div class="row">
+    <div class="col-sm-2">
+        <p><span id="connectionState" class="badge bg-danger">Server Not Connected</span></p>
+    </div>
+    <div class="col-sm-9">
+        
+    </div>
+</div>
+<script>
+    scheme = document.location.protocol === "https:" ? "wss" : "ws";
+    port = document.location.port ? (":" + document.location.port) : "";
+
+    let settings = {
+        connState: document.getElementById("connectionState"),
+        serverIp: scheme + "://" + document.location.hostname + port + "/webclient/",
+        statusUpdateCode: 'WaterSensor',
+        connectedYes: '@Languages.LanguageStrings.Yes',
+        connectedNo: '@Languages.LanguageStrings.No'
+    }
+
+    opOverkill.init(settings);
+</script>

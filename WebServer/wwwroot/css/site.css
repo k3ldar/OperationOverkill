@@ -1,0 +1,270 @@
+body {
+    padding-top: 5px;
+    padding-bottom: 20px;
+}
+
+.modal-open {
+    padding-right: 17px !important;
+}
+
+/* Wrapping element */
+/* Set some basic padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.mnuBar {
+    width: 100%;
+    position: fixed;
+    top: 0px;
+    padding-bottom: 10px;
+    display: inline-block;
+}
+
+.content {
+    padding-top: 60px;
+}
+
+.fr {
+    float: right;
+}
+
+.bg-blue {
+    background-color: #2E86C1;
+}
+h1 {
+    font-size: 1.35rem;
+    margin: 0 0 10px 0;
+}
+
+h2 {
+    font-size: 1.32rem;
+    margin: 0 0 10px 0;
+}
+
+h3 {
+    font-size: 1.25rem;
+    margin: 0 0 10px 0;
+}
+
+h4 {
+    font-size: 1.1rem;
+    margin: 0 0 10px 0;
+}
+
+.hdrNext {
+    padding: 15px 0 0 0;
+}
+
+.nav-item .li {
+    display: inline;
+}
+.nav-item:hover {
+    border-bottom: 4px solid #3d3d3d;
+    height: 33px;
+    margin-bottom: 4px;
+}
+
+.nav-item-nohover {
+    border: 0;
+    height: 33px;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+/* Carousel */
+.carousel-caption p {
+    font-size: 20px;
+    line-height: 1.4;
+}
+
+/* Make .svg files in the carousel display properly in older browsers */
+.carousel-inner .item img[src$=".svg"] {
+    width: 100%;
+}
+
+.row {
+
+}
+
+/* Hide/rearrange for smaller screens */
+@media screen and (max-width: 576px) {
+    .navbar-brand {
+        font-size: 12px;
+    }
+
+    .nav-item {
+        font-size: 13px;
+    }
+
+    .footer {
+        font-size: 11px;
+        margin-top: 25px;
+    }
+
+        .footer .btn {
+            font-size: 11px;
+        }
+
+    #mapid {
+        height: 200px;
+    }
+
+    .table {}
+}
+
+@media screen and (min-width: 768px) {
+    /* Hide captions */
+    .carousel-caption {
+        display: none;
+    }
+
+    .nav-item {
+        font-size: 12px;
+    }
+
+    .footer {
+        font-size: 11px;
+        margin-top: 25px;
+    }
+
+    #mapid {
+        height: 300px;
+    }
+}
+
+@media screen and (min-width: 992px) {
+    .navbar-brand {
+        font-size: 15px;
+    }
+
+    .nav-item {
+        font-size: 13px;
+    }
+
+    .footer {
+        font-size: 14px;
+        margin-top: 25px;
+    }
+
+    #mapid {
+        height: 600px;
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    .navbar-brand {
+        font-size: 1.25em;
+    }
+
+    .nav-item {
+        font-size: 14px;
+    }
+
+    .cart-summary {
+        font-size: 14px;
+    }
+
+    .footer {
+        font-size: 14px;
+        margin-top: 25px;
+    }
+
+    #mapid {
+        height: 600px;
+    }
+}
+
+
+.validation-summary-errors {
+    color: red;
+}
+
+    .validation-summary-errors ul {
+        list-style-type: none;
+        padding-left: 0px;
+    }
+
+.field-validation-error {
+    color: red;
+}
+
+.bc {
+    padding: 2px 0px 2px 0px;
+    height: 20px !important;
+    display: contents;
+}
+
+    .bc ul {
+        list-style: none;
+        padding-left: 6px;
+        padding-top: 6px;
+        margin-bottom: 8px;
+    }
+
+        .bc ul li {
+            display: inline;
+            font-size: 12px;
+        }
+
+            .bc ul li + li:before {
+                padding: 8px;
+                color: black;
+                content: "/\00a0";
+            }
+
+            .bc ul li a {
+                color: #0275d8;
+                text-decoration: none;
+            }
+
+                .bc ul li a:hover {
+                    color: #01447e;
+                    text-decoration: underline;
+                }
+
+
+@media screen and (max-width: 768px) {
+
+    h1 {
+        font-size: 1.35rem;
+    }
+
+    h2 {
+        font-size: 1.32rem;
+    }
+
+    h3 {
+        font-size: 1.25rem;
+    }
+
+    h4 {
+        font-size: 1.1rem;
+    }
+}
+
+.card {
+    font-size: 15px;
+}
+
+.ccOuter {
+    margin: auto;
+    width: 45%;
+    padding: 5px;
+}
+
+.ccInner {
+    border: 2px solid rgb(0, 0, 0);
+    border-radius: 5px;
+    margin: 0 0 15px 0;
+    padding: 10px 10px 0 10px;
+    width: auto;
+    display: inline-block;
+    text-align: center;
+}
+
+.rowSpace {
+    margin: 12px 0 0 0;
+}
+

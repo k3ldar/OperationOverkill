@@ -1,0 +1,84 @@
+<Project>
+  
+  <PropertyGroup>
+    <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+    <NoWarn>1701;1702;8032;8981;IDE0079;IDE0076</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <SignAssembly>false</SignAssembly>
+    <Description>GCode Sender and Analyzer</Description>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+	<DebugType>embedded</DebugType>
+    <NeutralLanguage>en-GB</NeutralLanguage>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <BaseOutputPath>..\..\Output\</BaseOutputPath>
+    <XmlDocsPath>$(SolutionDir)Docs\XmlFiles</XmlDocsPath>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <RepositoryUrl>https://github.com/k3ldar/.NetCorePluginManager</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>GCode Sender</PackageTags>
+    <PackageProjectUrl>http://pluginmanager.website/</PackageProjectUrl>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <PackageReleaseNotes>Supports net7.0</PackageReleaseNotes>
+    <PackageTags>Operation Overkill</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <FrameWorkLatestVersion>net7.0</FrameWorkLatestVersion>
+  </PropertyGroup>
+	
+  <PropertyGroup>
+    <PluginVersion>5.5.1</PluginVersion>
+	<SharedVer>3.12.0</SharedVer>
+	<SharedWinVer>1.4.0</SharedWinVer>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <Version>0.9.8.1</Version>
+	<FileVersion>$(Version)</FileVersion>
+	<ProductVersion>$(Version)</ProductVersion>
+    <LangVersion>latest</LangVersion>
+    <Authors>Simon Carter (s1cart3r@gmail.com)</Authors>
+    <Company>Simon Carter</Company>
+    <Copyright>Copyright (c) 2023 Simon Carter.  All rights reserved.</Copyright>
+    <Description>Operation Overkill</Description>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)'=='Debug|net7.0'">
+    <DefineConstants>CODE_ANALYSIS;DEBUG;TRACE;NET_CORE;NET_6_0;NET_6_X;ISO_WEEK;ATTR_OS;NET_5_ABOVE;NET_6_ABOVE;NET_7_ABOVE;NET_7_0;NET_7_X;WIN_SYSTEM</DefineConstants>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)'=='Release|net7.0'">
+    <DefineConstants>CODE_ANALYSIS;NET_CORE;NET_6_0;NET_6_X;ISO_WEEK;ATTR_OS;NET_5_ABOVE;NET_6_ABOVE;NET_7_ABOVE;NET_7_0;NET_7_X;WIN_SYSTEM</DefineConstants>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)'=='Debug|net7.0-windows'">
+    <DefineConstants>CODE_ANALYSIS;DEBUG;TRACE;NET_CORE;NET_6_0;NET_6_X;ISO_WEEK;ATTR_OS;NET_5_ABOVE;NET_6_ABOVE;NET_7_ABOVE;NET_7_0;NET_7_X;WIN_SYSTEM</DefineConstants>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)'=='Release|net7.0-windows'">
+    <DefineConstants>CODE_ANALYSIS;NET_CORE;NET_6_0;NET_6_X;ISO_WEEK;ATTR_OS;NET_5_ABOVE;NET_6_ABOVE;NET_7_ABOVE;NET_7_0;NET_7_X;WIN_SYSTEM</DefineConstants>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>OpOverkillTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>
