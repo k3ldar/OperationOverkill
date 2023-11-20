@@ -16,3 +16,7 @@ There are 2 arduino's one connected to the pumps and one to my server.  The one 
 [s1cart3r.dynu.net](http://s1cart3r.dynu.net)
 
 Please note it is http only !
+
+## What's Next
+
+Why a mobile app of course, that could end up making it more overkill than necessary :-)
