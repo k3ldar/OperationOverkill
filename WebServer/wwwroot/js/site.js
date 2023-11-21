@@ -15,6 +15,7 @@ let opOverkill = (function () {
         connectedYes: 'Yes',
         connectedNo: 'No',
         machineHash: 0,
+        useAjax: true,
     }
 
     let that = {
@@ -28,16 +29,35 @@ let opOverkill = (function () {
 
 
             $(document).ready(function () {
-                that.updInterval = setInterval(function () {
-                    if (_settings.isConnected == false) {
-                        that.connectToServer();
-                    }
-                    else if (_settings.sendUpdateRequest == true) {
-                        _settings.sendUpdateRequest = false;
-                        _settings.socket.send(_settings.statusUpdateCode);
-                    }
-                }, 200);
+                if (_settings.useAjax === true) {
+                    window.setInterval(that.updateStatistics, 1000);
+                    _settings.connState.style.visibility = "hidden";
+                }
+                else {
+                    that.updInterval = setInterval(function () {
+                        if (_settings.isConnected === false) {
+                            that.connectToServer();
+                        }
+                        else if (_settings.sendUpdateRequest === true) {
+                            _settings.sendUpdateRequest = false;
+                            _settings.socket.send(_settings.statusUpdateCode);
+                        }
+                    }, 200);
+                }
             });
+        },
+
+        updateStatistics: function () {
+            $.ajax({
+                type: 'GET',
+                url: '/Home/GetSensorUpdates',
+                cache: false,
+                success: function (response) {
+                    let wsd = JSON.parse(response.responseData);
+                    that.updateWaterSensorStatus(wsd);
+                },
+            });
+
         },
 
         connected: function () {

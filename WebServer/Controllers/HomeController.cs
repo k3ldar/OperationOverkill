@@ -6,6 +6,8 @@ using OpOverkill.Models;
 
 using OpOverkillShared;
 
+using OpOverkillWebServer.Models;
+
 using SharedPluginFeatures;
 
 namespace OpOverkill.Controllers
@@ -24,6 +26,13 @@ namespace OpOverkill.Controllers
         public IActionResult Index()
         {
             return View(CreateIndexModel());
+        }
+
+        [HttpGet]
+        [AjaxOnly]
+        public JsonResult GetSensorUpdates()
+        {
+            return GenerateJsonSuccessResponse(new SensorUpdateModel(_arduinoProcessor));
         }
 
         private IndexViewModel CreateIndexModel()
