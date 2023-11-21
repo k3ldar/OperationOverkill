@@ -15,6 +15,8 @@ namespace OpOverkillWebServer.Models
             Pump2Active = arduinoProcessor.Pump2Active;
             SensorValue = arduinoProcessor.SensorValue;
             RelayCount = arduinoProcessor.RelayCount;
+
+            Time = DateTime.Now.ToString("HH:mm:ss");
         }
 
         public bool Pump1Active { get; }
@@ -24,5 +26,7 @@ namespace OpOverkillWebServer.Models
         public int SensorValue { get; }
 
         public int RelayCount { get; }
+
+        public string Time { get; }
     }
 }

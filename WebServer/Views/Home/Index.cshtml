@@ -8,14 +8,17 @@
         <h3>Water Sensor Reading</h3>
     </div>
 </div>
-
+<div class="row">
+    <div class="col">Time</div>
+    <div class="col"><span id="spTime"></span></div>
+</div>
 <div class="row">
     <div class="col">Pump 1 Active</div>
-    <div class="col"><span id="spPump1">@Model.Pump1Active</span></div>
+    <div class="col"><span id="spPump1">@Model.Pump1Active.ToString().ToLower()</span></div>
 </div>
 <div class="row">
     <div class="col">Pump 2 Active</div>
-    <div class="col"><span id="spPump2">@Model.Pump2Active</span></div>
+    <div class="col"><span id="spPump2">@Model.Pump2Active.ToString().ToLower()</span></div>
 </div>
 <div class="row">
     <div class="col">Sensor Value</div>

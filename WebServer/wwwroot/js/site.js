@@ -138,11 +138,13 @@ let opOverkill = (function () {
             let p2 = document.getElementById("spPump2");
             let sen = document.getElementById("spSensor");
             let rel = document.getElementById("spRelay");
+            let ran = document.getElementById("spTime");
 
             p1.innerText = wsd.Pump1Active;
             p2.innerText = wsd.Pump2Active;
             sen.innerText = wsd.SensorValue;
             rel.innerText = wsd.RelayCount;
+            ran.innerText = wsd.Time;
         },
 
         htmlEscape: function (str) {

@@ -115,8 +115,9 @@ namespace OpOverkillShared
             RelayCount = Convert.ToInt32(parts[2]);
             Pump1Active = Convert.ToInt32(parts[3]) != 0;
             Pump2Active = Convert.ToInt32(parts[4]) != 0;
-
+#if DEBUG
             Console.WriteLine($"{DateTime.Now.ToString("HH:mm:ss")} Sensor value: {SensorValue}; Relay Count: {RelayCount}; Pump 1 Active: {Pump1Active}; Pump 2 Active: {Pump2Active}");
+#endif
         }
     }
 }
