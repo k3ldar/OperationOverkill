@@ -36,6 +36,53 @@
         
     </div>
 </div>
+<div class="row">
+    <div class="col-sm-12">
+        <hr />
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <h3>Current Weather Forecast (Hourly)</h3>
+    </div>
+</div>
+<div class="row">
+    <div class="col">Temperature</div>
+    <div class="col"><span id="spTemp">-</span></div>
+</div>
+<div class="row">
+    <div class="col">Humidity</div>
+    <div class="col"><span id="spHumid">-</span></div>
+</div>
+<div class="row">
+    <div class="col">Dew Point</div>
+    <div class="col"><span id="spDewPoint">-</span></div>
+</div>
+<div class="row">
+    <div class="col">Precipitation Probability</div>
+    <div class="col"><span id="spPrecipProb">-</span></div>
+</div>
+<div class="row">
+    <div class="col">Precipitation</div>
+    <div class="col"><span id="spPrecip">-</span></div>
+</div>
+<div class="row">
+    <div class="col">Rain</div>
+    <div class="col"><span id="spRain">-</span></div>
+</div>
+<div class="row">
+    <div class="col">Showers</div>
+    <div class="col"><span id="spShowers">-</span></div>
+</div>
+<div class="row">
+    <div class="col">Wind Speed</div>
+    <div class="col"><span id="spWindSpeed">-</span></div>
+</div>
+<div class="row">
+    <div class="col">Wind Direction</div>
+    <div class="col"><span id="spWindDirection">-</span></div>
+</div>
+
 <script>
     scheme = document.location.protocol === "https:" ? "wss" : "ws";
     port = document.location.port ? (":" + document.location.port) : "";

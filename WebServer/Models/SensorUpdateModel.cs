@@ -1,6 +1,7 @@
 ﻿using System;
 
 using OpOverkillShared;
+using OpOverkillShared.Classes;
 
 namespace OpOverkillWebServer.Models
 {
@@ -17,6 +18,7 @@ namespace OpOverkillWebServer.Models
             RelayCount = arduinoProcessor.RelayCount;
 
             Time = DateTime.Now.ToString("HH:mm:ss");
+            WeatherData = WeatherUpdateThread.LatestWeatherData.CurrentData();
         }
 
         public bool Pump1Active { get; }
@@ -28,5 +30,7 @@ namespace OpOverkillWebServer.Models
         public int RelayCount { get; }
 
         public string Time { get; }
+
+        public CurrentWeatherData WeatherData { get; }
     }
 }

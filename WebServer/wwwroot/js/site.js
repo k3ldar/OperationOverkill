@@ -134,17 +134,25 @@ let opOverkill = (function () {
         },
 
         updateWaterSensorStatus: function (wsd) {
-            let p1 = document.getElementById("spPump1");
-            let p2 = document.getElementById("spPump2");
-            let sen = document.getElementById("spSensor");
-            let rel = document.getElementById("spRelay");
-            let ran = document.getElementById("spTime");
+            that.updateSpan(document.getElementById("spPump1"), wsd.Pump1Active);
+            that.updateSpan(document.getElementById("spPump2"), wsd.Pump2Active);
+            that.updateSpan(document.getElementById("spSensor"), wsd.SensorValue);
+            that.updateSpan(document.getElementById("spRelay"), wsd.RelayCount);
+            that.updateSpan(document.getElementById("spTime"), wsd.Time);
 
-            p1.innerText = wsd.Pump1Active;
-            p2.innerText = wsd.Pump2Active;
-            sen.innerText = wsd.SensorValue;
-            rel.innerText = wsd.RelayCount;
-            ran.innerText = wsd.Time;
+            that.updateSpan(document.getElementById("spTemp"), wsd.WeatherData.Temperature_2m);
+            that.updateSpan(document.getElementById("spHumid"), wsd.WeatherData.Relative_humidity_2m);
+            that.updateSpan(document.getElementById("spDewPoint"), wsd.WeatherData.Dew_point_2m);
+            that.updateSpan(document.getElementById("spPrecipProb"), wsd.WeatherData.Precipitation_probability);
+            that.updateSpan(document.getElementById("spPrecip"), wsd.WeatherData.Precipitation);
+            that.updateSpan(document.getElementById("spRain"), wsd.WeatherData.Rain);
+            that.updateSpan(document.getElementById("spShowers"), wsd.WeatherData.Showers);
+            that.updateSpan(document.getElementById("spWindSpeed"), wsd.WeatherData.WindSpeed);
+            that.updateSpan(document.getElementById("spWindDirection"), wsd.WeatherData.WindDirection);
+        },
+
+        updateSpan: function (n, v) {
+            n.innerText = v;
         },
 
         htmlEscape: function (str) {
