@@ -8,11 +8,9 @@
 
         int SensorValue { get; }
 
+        double Average15Seconds { get; }
+
         double Average30Seconds { get; }
-
-        double Average1Minute { get; }
-
-        double Average30Minutes { get; }
 
         int RelayCount { get; }
 

@@ -31,7 +31,7 @@
   </PropertyGroup>
 	
   <PropertyGroup>
-    <PluginVersion>5.5.1</PluginVersion>
+    <PluginVersion>5.5.2</PluginVersion>
 	<SharedVer>3.12.0</SharedVer>
 	<SharedWinVer>1.4.0</SharedWinVer>
   </PropertyGroup>

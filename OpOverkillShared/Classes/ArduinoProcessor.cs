@@ -4,8 +4,7 @@ namespace OpOverkillShared
 {
     public sealed class ArduinoProcessor : IArduinoProcessor
     {
-        private const int SixtySeconds = 60;
-        private const int ThirtyMinutes = 30;
+        private const int FifteenSeconds = 15;
         private const int ThirtySeconds = 30;
 
         private readonly WindowsComPort _comport;
@@ -13,9 +12,8 @@ namespace OpOverkillShared
         private bool _pump2Active;
         private int _sensorValue = -1;
         private int _relayCount;
+        private readonly ConcurrentQueue<int> _average15Seconds = new();
         private readonly ConcurrentQueue<int> _average30Seconds = new();
-        private readonly ConcurrentQueue<int> _average1Minute = new();
-        private readonly ConcurrentQueue<double> _average30Minutes = new();
 
         public ArduinoProcessor(WindowsComPort comPort)
         {
@@ -73,18 +71,15 @@ namespace OpOverkillShared
                     SensorValueChanged?.Invoke(this, EventArgs.Empty);
                 }
 
+                _average15Seconds.Enqueue(value);
+
+                if (_average15Seconds.Count > FifteenSeconds)
+                    _average15Seconds.TryDequeue(out int _);
+
                 _average30Seconds.Enqueue(value);
 
                 if (_average30Seconds.Count > ThirtySeconds)
                     _average30Seconds.TryDequeue(out int _);
-
-                _average1Minute.Enqueue(_sensorValue);
-
-                if (_average1Minute.Count > SixtySeconds && _average1Minute.TryDequeue(out int _))
-                    _average30Minutes.Enqueue(_average1Minute.Average());
-
-                if (_average30Minutes.Count > ThirtyMinutes)
-                    _average30Minutes.TryDequeue(out double _);
             }
         }
 
@@ -102,11 +97,9 @@ namespace OpOverkillShared
             }
         }
 
+        public double Average15Seconds => _average15Seconds.Count == 0 ? 0 : _average15Seconds.Average();
+
         public double Average30Seconds => _average30Seconds.Count == 0 ? 0 : _average30Seconds.Average();
-
-        public double Average1Minute => _average1Minute.Count == 0 ? Average30Seconds : _average1Minute.Average();
-
-        public double Average30Minutes => _average30Minutes.Count == 0 ? Average1Minute : _average30Minutes.Average();
 
         public event EventHandler Pump1ActiveChanged;
         public event EventHandler Pump2ActiveChanged;

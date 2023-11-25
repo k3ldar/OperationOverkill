@@ -10,7 +10,7 @@ namespace OpOverkillShared
 
         public WindowsComPort(ISettingsProvider settingsProvider)
         {
-            Settings settings = settingsProvider.GetSettings<Settings>("Settings");
+            Settings settings = settingsProvider.GetSettings<Settings>("ComSettings");
 
 
             Name = settings.ComPort;
