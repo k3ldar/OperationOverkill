@@ -56,6 +56,18 @@ void CommandReceived()
     commandMgr.sendCommand("IPV", String(radio.isPVariant()));
     return;
   }
+
+  if (commandMgr.getCommand() == "TCAR")
+  {
+    commandMgr.sendCommand("TCAR", String(radio.testCarrier()));
+    return;
+  }
+
+  if (commandMgr.getCommand() == "TRPD")
+  {
+    commandMgr.sendCommand("TRPD", String(radio.testRPD()));
+    return;
+  }
   
   commandMgr.sendDebug("UNKNOWN", commandMgr.getCommand());
 }

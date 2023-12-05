@@ -60,6 +60,7 @@ void setup()
   radio.openWritingPipe(RFAddress);
   radio.setPALevel(RF24_PA_MAX);
   radio.setDataRate(RF24_1MBPS);
+  radio.stopListening();
 }
 
 int getSensorValue()
@@ -148,7 +149,7 @@ void loop()
 {
   processWaterSensor();
 
-  if (radio.available())
+  /*if (radio.available())
   {
         char text[32] = "";
         radio.read(&text, sizeof(text));
@@ -158,7 +159,7 @@ void loop()
         {
             Serial.println(text);
         }
-  }
+  }*/
 }
 
 void processWaterSensor()
