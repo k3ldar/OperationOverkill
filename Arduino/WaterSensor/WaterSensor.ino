@@ -215,10 +215,13 @@ void processWaterSensor()
 
         char data[32] = "";
         combined.toCharArray(data, sizeof(data));
+
+        radio.stopListening();
         if (!radio.write(&data, sizeof(data)))
         {
           Serial.println("Failed to write data");
         }
+        radio.startListening();
         Serial.println(data);
     }
 }
