@@ -4,6 +4,7 @@
 #include <Queue.h>
 #include <MemoryFree.h>
 
+#define SERIAL_DEBUG
 #define Relay_1_Threshold 400
 #define Relay_2_Threshold 420
 #define MinimumCutoffThreshold 370
@@ -35,7 +36,7 @@ unsigned long turnPump1OffMilli = 0;
 unsigned long turnPump2OffMilli = 0;
 
 RF24 radio(RF_CE_PIN, RF_CSN_PIN);
-const byte RFAddress[6] = "SA001";
+const byte RFAddress[6] = "RF001";
 
 void setup() 
 {
@@ -54,9 +55,11 @@ void setup()
   digitalWrite(Relay_1_PIN, LOW);
   digitalWrite(Relay_2_PIN, LOW);
   digitalWrite(WaterSensor_Power_Pin, LOW);
+  
+  if (!radio.begin())
+    Serial.println("Radio not responding");
 
-  radio.begin();
-  radio.setRetries(3, 5);
+  radio.setRetries(6, 4);
   radio.openWritingPipe(RFAddress);
   radio.setPALevel(RF24_PA_MAX);
   radio.setDataRate(RF24_1MBPS);
@@ -212,8 +215,10 @@ void processWaterSensor()
 
         char data[32] = "";
         combined.toCharArray(data, sizeof(data));
-        radio.write(&data, sizeof(data));
-        
+        if (!radio.write(&data, sizeof(data)))
+        {
+          Serial.println("Failed to write data");
+        }
         Serial.println(data);
     }
 }

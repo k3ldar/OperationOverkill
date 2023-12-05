@@ -12,14 +12,16 @@ void CommandReceived();
 SerialCommandManager commandMgr(CommandReceived, '\n', ':', '=', 500, 256);
 
 RF24 radio(RF_CE_PIN, RF_CSN_PIN);
-const byte RFAddress[6] = "SA001";
+const byte RFAddress[6] = "RF001";
 
 
 void setup()
 {
   Serial.begin(115200);
   
-  radio.begin();
+  if (!radio.begin())
+    Serial.println("Radio not responding");
+    
   radio.openReadingPipe(0, RFAddress);
   radio.setPALevel(RF24_PA_MAX);
   radio.setDataRate(RF24_1MBPS);
