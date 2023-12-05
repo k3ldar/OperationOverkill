@@ -12,7 +12,7 @@ void CommandReceived();
 SerialCommandManager commandMgr(CommandReceived, '\n', ':', '=', 500, 256);
 
 RF24 radio(RF_CE_PIN, RF_CSN_PIN);
-const byte RFAddress[6] = "SI001";
+const byte RFAddress[6] = "SA001";
 
 
 void setup()
