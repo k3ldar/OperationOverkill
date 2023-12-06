@@ -4,6 +4,14 @@
 #include "SerialCommandManager.h"
 
 
+#define MAX_PACKET_SIZE 32
+const byte RFAddresses[][6] = { 
+                                "RF001", // Main receiver (this) (write)
+                                "RF002", // Water sensor (read)
+                                "RF003"  // Weather station (read)
+                              };
+
+
 #define RF_CE_PIN 9
 #define RF_CSN_PIN 10
 
@@ -12,7 +20,6 @@ void CommandReceived();
 SerialCommandManager commandMgr(CommandReceived, '\n', ':', '=', 500, 256);
 
 RF24 radio(RF_CE_PIN, RF_CSN_PIN);
-const byte RFAddress[6] = "RF001";
 
 
 void setup()
@@ -21,8 +28,10 @@ void setup()
   
   if (!radio.begin())
     Serial.println("Radio not responding");
-    
-  radio.openReadingPipe(0, RFAddress);
+
+  radio.openWritingPipe(RFAddresses[0]);
+  radio.openReadingPipe(1, RFAddresses[1]);
+  radio.openReadingPipe(2, RFAddresses[2]);
   radio.setPALevel(RF24_PA_MAX);
   radio.setDataRate(RF24_1MBPS);
   radio.startListening();
@@ -70,8 +79,34 @@ void CommandReceived()
     commandMgr.sendCommand("TRPD", String(radio.testRPD()));
     return;
   }
+
+  if (commandMgr.getCommand() == "T1")
+  {
+    StringKeyValue argValue = commandMgr.getArgs(0);
+    String broadcastData = String("0/T1/") + String(argValue.key);
+    BroadcastRFData(broadcastData);
+    return;
+  }
   
   commandMgr.sendDebug("UNKNOWN", commandMgr.getCommand());
+}
+
+void BroadcastRFData(String data)
+{
+  char rfData[MAX_PACKET_SIZE] = "";
+  data.toCharArray(rfData, MAX_PACKET_SIZE);
+
+  radio.stopListening();
+
+  if (!radio.write(&rfData, MAX_PACKET_SIZE, true))
+  {
+    Serial.print("Failed to broadcast data: ");
+    Serial.println(data);
+  }
+  
+  delay(5);
+  
+  radio.startListening();
 }
 
 void loop()
@@ -80,13 +115,14 @@ void loop()
 
     if (radio.available())
     {
-        char text[32] = "";
-        radio.read(&text, sizeof(text));
+        char text[MAX_PACKET_SIZE] = "";
+        radio.read(&text, MAX_PACKET_SIZE);
         String receivedText = String(text);
         
         if (receivedText.length() > 0)
         {
-            commandMgr.sendCommand("RF", text);
+          BroadcastRFData(text);
+          commandMgr.sendCommand("RF", text);
         }
     }
 }

@@ -4,6 +4,16 @@
 #include <Queue.h>
 #include <MemoryFree.h>
 
+
+#define MAX_PACKET_SIZE 32
+const byte RFAddresses[][6] = { 
+                                "RF001", // Main receiver (this) (read)
+                                "RF002", // Water sensor (this) (write)
+                                "RF003"  // Weather station (not used here)
+                              };
+const byte DEVICE_RF_Id = 49;
+
+
 #define SERIAL_DEBUG
 #define Relay_1_Threshold 400
 #define Relay_2_Threshold 420
@@ -20,8 +30,6 @@
 #define RF_CE_PIN 8
 #define RF_CSN_PIN 9
 
-const byte RF_NODE_ID = 1;
-
 #define WaterSensor_Signal_Pin A4
 
 bool Relay1Active = false;
@@ -36,7 +44,6 @@ unsigned long turnPump1OffMilli = 0;
 unsigned long turnPump2OffMilli = 0;
 
 RF24 radio(RF_CE_PIN, RF_CSN_PIN);
-const byte RFAddress[6] = "RF001";
 
 void setup() 
 {
@@ -60,10 +67,11 @@ void setup()
     Serial.println("Radio not responding");
 
   radio.setRetries(6, 4);
-  radio.openWritingPipe(RFAddress);
+  radio.openWritingPipe(RFAddresses[1]);
+  radio.openReadingPipe(1, RFAddresses[0]);
   radio.setPALevel(RF24_PA_MAX);
   radio.setDataRate(RF24_1MBPS);
-  radio.stopListening();
+  radio.startListening();
 }
 
 int getSensorValue()
@@ -152,17 +160,36 @@ void loop()
 {
   processWaterSensor();
 
-  /*if (radio.available())
+  if (radio.available())
   {
-        char text[32] = "";
-        radio.read(&text, sizeof(text));
-        String receivedText = String(text);
-        
-        if (receivedText.length() > 0)
-        {
-            Serial.println(text);
-        }
-  }*/
+    char text[MAX_PACKET_SIZE] = "";
+    radio.read(&text, MAX_PACKET_SIZE);
+    String receivedText = String(text);
+    
+    if (receivedText.length() > 0)
+    {
+      if (receivedText[0] != DEVICE_RF_Id)
+      {          
+        Serial.print("Received RF Data: ");
+        Serial.println(text);
+      }
+    }
+  }
+}
+
+void WriteDataToRF(String dataToSend)
+{
+    char data[MAX_PACKET_SIZE] = "";
+    dataToSend.toCharArray(data, MAX_PACKET_SIZE);
+
+    radio.stopListening();
+    if (!radio.write(&data, MAX_PACKET_SIZE))
+    {
+      Serial.println("Failed to write data");
+    }
+
+    delay(5);
+    radio.startListening();
 }
 
 void processWaterSensor()
@@ -213,15 +240,7 @@ void processWaterSensor()
           String(Relay1Active) + "/" +
           String(Relay2Active);
 
-        char data[32] = "";
-        combined.toCharArray(data, sizeof(data));
-
-        radio.stopListening();
-        if (!radio.write(&data, sizeof(data)))
-        {
-          Serial.println("Failed to write data");
-        }
-        radio.startListening();
-        Serial.println(data);
+        WriteDataToRF(combined);
+        Serial.println(combined);
     }
 }
