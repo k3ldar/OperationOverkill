@@ -96,7 +96,7 @@ namespace OpOverkillShared
         private void AddEventsToProcessor(IArduinoProcessor arduinoProcessor)
         {
             arduinoProcessor.SensorValueChanged += ArduinoProcessor_SensorValueChanged;
-            arduinoProcessor.RelayValueChanged += ArduinoProcessor_RelayValueChanged;
+            arduinoProcessor.SensorAverageValueChanged += ArduinoProcessor_SensorAverageValueChanged;
             arduinoProcessor.Pump1ActiveChanged += ArduinoProcessor_Pump1ActiveChanged;
             arduinoProcessor.Pump2ActiveChanged += ArduinoProcessor_Pump2ActiveChanged;
         }
@@ -104,7 +104,7 @@ namespace OpOverkillShared
         private void RemoveEventsFromProcessor(IArduinoProcessor arduinoProcessor)
         {
             arduinoProcessor.SensorValueChanged -= ArduinoProcessor_SensorValueChanged;
-            arduinoProcessor.RelayValueChanged -= ArduinoProcessor_RelayValueChanged;
+            arduinoProcessor.SensorAverageValueChanged -= ArduinoProcessor_SensorAverageValueChanged;
             arduinoProcessor.Pump1ActiveChanged -= ArduinoProcessor_Pump1ActiveChanged;
             arduinoProcessor.Pump2ActiveChanged -= ArduinoProcessor_Pump2ActiveChanged;
         }
@@ -121,10 +121,10 @@ namespace OpOverkillShared
             SendMessage(nameof(IArduinoProcessor.Pump2ActiveChanged));
         }
 
-        private void ArduinoProcessor_RelayValueChanged(object sender, EventArgs e)
+        private void ArduinoProcessor_SensorAverageValueChanged(object sender, EventArgs e)
         {
-            _logger.AddToLog(PluginManager.LogLevel.Information, $"Relay Count Changed: {_arduinoProcessor?.RelayCount}");
-            SendMessage(nameof(IArduinoProcessor.RelayValueChanged));
+            _logger.AddToLog(PluginManager.LogLevel.Information, $"Relay Count Changed: {_arduinoProcessor?.SensorAverage}");
+            SendMessage(nameof(IArduinoProcessor.SensorAverage));
         }
 
         private void ArduinoProcessor_SensorValueChanged(object sender, EventArgs e)

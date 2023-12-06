@@ -8,11 +8,7 @@
 
         int SensorValue { get; }
 
-        double Average15Seconds { get; }
-
-        double Average30Seconds { get; }
-
-        int RelayCount { get; }
+        int SensorAverage { get; }
 
         event EventHandler Pump1ActiveChanged;
 
@@ -20,7 +16,7 @@
 
         event EventHandler SensorValueChanged;
 
-        event EventHandler RelayValueChanged;
+        event EventHandler SensorAverageValueChanged;
 
         void Connect();
     }

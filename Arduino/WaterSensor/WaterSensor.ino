@@ -1,8 +1,8 @@
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
-#include <Queue.h>
 #include <MemoryFree.h>
+#include <WaterPump.h>
 
 
 #define MAX_PACKET_SIZE 32
@@ -14,54 +14,41 @@ const byte RFAddresses[][6] = {
 const byte DEVICE_RF_Id = 49;
 
 
-#define SERIAL_DEBUG
-#define Relay_1_Threshold 400
-#define Relay_2_Threshold 420
-#define MinimumCutoffThreshold 370
-#define MinimumPumpTimeMs 4000
-#define ReadSensorMs 1000
+#define NO_TEMPERATURE_DATA -100
 
+
+// water sensor pins
+#define WaterSensor_Signal_Pin A4
 #define Sensor_Active_LED_PIN 2
 #define Relay_1_LED_PIN 3
 #define Relay_2_LED_PIN 4
 #define Relay_1_PIN 5
 #define Relay_2_PIN 6
 #define WaterSensor_Power_Pin 7
+
 #define RF_CE_PIN 8
 #define RF_CSN_PIN 9
+#define TEMP_UPDATE_MAX 1000 * 60 * 5
 
-#define WaterSensor_Signal_Pin A4
 
-bool Relay1Active = false;
-byte Relay1Readings = 0;
-bool Relay2Active = false;
+//bool Relay1Active = false;
+//byte Relay1Readings = 0;
+//bool Relay2Active = false;
+int currentTemperature = NO_TEMPERATURE_DATA;
 
-Queue queue(15);
-
-unsigned long myTime;
-int sensor1Value = 0;
-unsigned long turnPump1OffMilli = 0;
-unsigned long turnPump2OffMilli = 0;
-
+WaterPump waterPump(WaterSensor_Signal_Pin, WaterSensor_Power_Pin, Sensor_Active_LED_PIN, Relay_1_LED_PIN, Relay_2_LED_PIN, Relay_1_PIN, Relay_2_PIN);
 RF24 radio(RF_CE_PIN, RF_CSN_PIN);
+
+
+
+//unsigned long _tempLastUpdated = millis()-
+
 
 void setup() 
 {
   Serial.begin(115200);
-  
-  pinMode(Sensor_Active_LED_PIN, OUTPUT);
-  pinMode(Relay_1_LED_PIN, OUTPUT);
-  pinMode(Relay_2_LED_PIN, OUTPUT);
-  pinMode(Relay_1_PIN, OUTPUT);
-  pinMode(Relay_2_PIN, OUTPUT);
-  pinMode(WaterSensor_Power_Pin, OUTPUT);
-  
-  digitalWrite(Sensor_Active_LED_PIN, LOW);
-  digitalWrite(Relay_1_LED_PIN, LOW);
-  digitalWrite(Relay_2_LED_PIN, LOW);
-  digitalWrite(Relay_1_PIN, LOW);
-  digitalWrite(Relay_2_PIN, LOW);
-  digitalWrite(WaterSensor_Power_Pin, LOW);
+
+  waterPump.initialize(&WriteDataToRF);
   
   if (!radio.begin())
     Serial.println("Radio not responding");
@@ -74,91 +61,9 @@ void setup()
   radio.startListening();
 }
 
-int getSensorValue()
-{
-    digitalWrite(Sensor_Active_LED_PIN, HIGH);
-    digitalWrite(WaterSensor_Power_Pin, HIGH);
-    delay(10);
-    int s1Value = analogRead(WaterSensor_Signal_Pin);
-    digitalWrite(WaterSensor_Power_Pin, LOW);
-    digitalWrite(Sensor_Active_LED_PIN, LOW);
-
-    return s1Value;
-}
-
-void turnPump1Off()
-{
-    if (!Relay1Active)
-        return;
-        
-    digitalWrite(Relay_1_LED_PIN, LOW);
-    digitalWrite(Relay_1_PIN, LOW);
-    Serial.println("Relay 1 OFF");
-    Relay1Active = false;
-}
-
-void turnPump1On()
-{
-    digitalWrite(Relay_1_LED_PIN, HIGH);
-    digitalWrite(Relay_1_PIN, HIGH);
-    Serial.println("Relay 1 ON");
-    Relay1Active = true;
-    turnPump1OffMilli = millis() + MinimumPumpTimeMs;
-}
-
-void processPump1(unsigned long currTime, int average)
-{
-    if (Relay1Active)
-    {
-        if (currTime >= turnPump1OffMilli || sensor1Value <= MinimumCutoffThreshold)
-        {
-          turnPump1Off();
-        }
-    }
-    else if (average >= Relay_1_Threshold)
-    {
-        turnPump1On();
-    }
-}
-
-void turnPump2Off()
-{
-    digitalWrite(Relay_2_LED_PIN, LOW);
-    digitalWrite(Relay_2_PIN, LOW);
-    Serial.println("Relay 2 OFF");
-    Relay2Active = false;
-}
-
-void turnPump2On()
-{
-    if (!Relay1Active)
-      return;
-      
-    digitalWrite(Relay_2_LED_PIN, HIGH);
-    digitalWrite(Relay_2_PIN, HIGH);
-    Serial.println("Relay 2 ON");
-    Relay2Active = true;
-    turnPump2OffMilli = millis() + MinimumPumpTimeMs;
-}
-
-void processPump2(unsigned long currTime, int average)
-{
-    if (Relay2Active)
-    {
-        if (currTime > turnPump2OffMilli || Relay2Active && !Relay1Active || sensor1Value < MinimumCutoffThreshold || sensor1Value < Relay_2_Threshold)
-        {
-          turnPump2Off();
-        }
-    }
-    else if (average > Relay_2_Threshold)
-    {
-        turnPump2On();
-    }
-}
-
 void loop()
 {
-  processWaterSensor();
+  waterPump.process();
 
   if (radio.available())
   {
@@ -190,57 +95,4 @@ void WriteDataToRF(String dataToSend)
 
     delay(5);
     radio.startListening();
-}
-
-void processWaterSensor()
-{
-    unsigned long currTime = millis();
-    bool validateSensor = false;
-    
-    if (currTime - myTime > ReadSensorMs)
-        validateSensor = true;
-  
-    if (validateSensor)
-    {
-        myTime = currTime;
-    
-        int s1Value = getSensorValue();
-
-        if (queue.isFull())
-          queue.dequeue();
-          
-        queue.enqueue(s1Value);
-        
-        if (s1Value != sensor1Value)
-        {
-            if (s1Value < sensor1Value)
-            {
-                if (Relay1Readings > 0)
-                {
-                  Relay1Readings--;
-                  Serial.print("Relay 1 Readings reset to ");
-                  Serial.println(Relay1Readings);
-                }
-            }
-    
-            sensor1Value = s1Value;
-        }
-
-        int average = queue.average();
-
-        if (queue.isFull())
-        {
-          processPump1(currTime, average);
-          processPump2(currTime, average);
-        }
-
-        String combined = "1/WS/" + String(s1Value) + "/" + 
-          String(average) + "/" +
-          String(Relay1Readings) + "/" + 
-          String(Relay1Active) + "/" +
-          String(Relay2Active);
-
-        WriteDataToRF(combined);
-        Serial.println(combined);
-    }
 }

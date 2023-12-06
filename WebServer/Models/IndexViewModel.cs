@@ -18,7 +18,7 @@ namespace OpOverkill.Models
             Pump1Active = arduinoProcessor.Pump1Active;
             Pump2Active = arduinoProcessor.Pump2Active;
             SensorValue = arduinoProcessor.SensorValue;
-            RelayCount = arduinoProcessor.RelayCount;
+            SensorAverage = arduinoProcessor.SensorAverage;
         }
 
         public bool Pump1Active { get; }
@@ -27,6 +27,6 @@ namespace OpOverkill.Models
 
         public int SensorValue { get; }
 
-        public int RelayCount { get; }
+        public int SensorAverage { get; }
     }
 }

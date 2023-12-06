@@ -137,10 +137,8 @@ let opOverkill = (function () {
             that.updateSpan(document.getElementById("spPump1"), wsd.Pump1Active);
             that.updateSpan(document.getElementById("spPump2"), wsd.Pump2Active);
             that.updateSpan(document.getElementById("spSensor"), wsd.SensorValue);
-            that.updateSpan(document.getElementById("spRelay"), wsd.RelayCount);
+            that.updateSpan(document.getElementById("spSensorAverage"), wsd.SensorAverage);
             that.updateSpan(document.getElementById("spTime"), wsd.Time);
-            that.updateSpan(document.getElementById("spAvgThirtySec"), wsd.Average30Seconds);
-            that.updateSpan(document.getElementById("spAvgFifteenSec"), wsd.Average15Seconds);
 
             that.updateSpan(document.getElementById("spTemp"), wsd.WeatherData.Temperature_2m);
             that.updateSpan(document.getElementById("spHumid"), wsd.WeatherData.Relative_humidity_2m);
