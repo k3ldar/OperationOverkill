@@ -19,7 +19,8 @@ WaterPump::WaterPump(
 	_pump2Pin = pump2Pin;
 	
 	_sensorValue = 0;
-	_myTime = 0;	
+	_myTime = 0;
+	_nextTemperatureCheck = millis();
 }
 
 WaterPump::~WaterPump()
@@ -55,12 +56,21 @@ double WaterPump::temperatureGet()
 void WaterPump::temperatureSet(double temperature)
 {
 	if (_currentTemperature != temperature)
+	{
 		_currentTemperature = temperature;
+		_nextTemperatureCheck = millis() + ValidTemperatureLength;
+	}
 }
 
 void WaterPump::process()
 {
     unsigned long currTime = millis();
+	
+	if (currTime > _nextTemperatureCheck)
+	{
+		temperatureSet(TemperatureNotSet);
+	}
+	
     bool validateSensor = false;
     
     if (currTime - _myTime > ReadSensorMs)
@@ -160,7 +170,7 @@ void WaterPump::processPump2(unsigned long currTime, int average)
 {    
 	if (_pump2Active)
     {
-        if (currTime > _turnPump2OffMilli || _pump2Active && !_pump1Active || _sensorValue < MinimumCutoffThreshold || _sensorValue < Relay_2_Threshold)
+        if (currTime > _turnPump2OffMilli || (_pump2Active && !_pump1Active) || _sensorValue < MinimumCutoffThreshold || _sensorValue < Relay_2_Threshold)
         {
           turnPump2Off();
         }

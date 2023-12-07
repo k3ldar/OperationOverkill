@@ -99,6 +99,7 @@ namespace OpOverkillShared
             arduinoProcessor.SensorAverageValueChanged += ArduinoProcessor_SensorAverageValueChanged;
             arduinoProcessor.Pump1ActiveChanged += ArduinoProcessor_Pump1ActiveChanged;
             arduinoProcessor.Pump2ActiveChanged += ArduinoProcessor_Pump2ActiveChanged;
+            arduinoProcessor.SensorTemperatureChanged += ArduinoProcessor_SensorTemperatureChanged;
         }
 
         private void RemoveEventsFromProcessor(IArduinoProcessor arduinoProcessor)
@@ -119,6 +120,11 @@ namespace OpOverkillShared
         {
             _logger.AddToLog(PluginManager.LogLevel.Information, $"Pump 2 Active Changed: {_arduinoProcessor?.Pump2Active}");
             SendMessage(nameof(IArduinoProcessor.Pump2ActiveChanged));
+        }
+
+        private void ArduinoProcessor_SensorTemperatureChanged(object sender, EventArgs e)
+        {
+            _logger.AddToLog(PluginManager.LogLevel.Information, $"Temperature Changed: {_arduinoProcessor.Temperature}");
         }
 
         private void ArduinoProcessor_SensorAverageValueChanged(object sender, EventArgs e)

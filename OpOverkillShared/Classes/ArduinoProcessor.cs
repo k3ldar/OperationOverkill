@@ -9,6 +9,7 @@ namespace OpOverkillShared
         private bool _pump2Active;
         private int _sensorValue = -1;
         private int _sensorAverage = 0;
+        private double _temperature = -99.9;
 
         public ArduinoProcessor(WindowsComPort comPort)
         {
@@ -85,10 +86,28 @@ namespace OpOverkillShared
             }
         }
 
+        public double Temperature
+        {
+            get
+            {
+                return _temperature;
+            }
+
+            set
+            {
+                if (value == _temperature)
+                    return;
+
+                _temperature = value;
+                SensorTemperatureChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
         public event EventHandler Pump1ActiveChanged;
         public event EventHandler Pump2ActiveChanged;
         public event EventHandler SensorValueChanged;
         public event EventHandler SensorAverageValueChanged;
+        public event EventHandler SensorTemperatureChanged;
 
         private void Comport_DataReceived(object sender, EventArgs e)
         {
@@ -119,6 +138,7 @@ namespace OpOverkillShared
         {
             SensorValue = Convert.ToInt32(parts[2]);
             SensorAverage = Convert.ToInt32(parts[3]);
+            Temperature = Convert.ToDouble(parts[4]);
             Pump1Active = Convert.ToInt32(parts[5]) != 0;
             Pump2Active = Convert.ToInt32(parts[6]) != 0;
 #if DEBUG

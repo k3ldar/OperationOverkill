@@ -11,6 +11,7 @@ const byte RFAddresses[][6] = {
                                 "RF002", // Water sensor (this) (write)
                                 "RF003"  // Weather station (not used here)
                               };
+
 const byte DEVICE_RF_Id = 49;
 
 
@@ -62,11 +63,34 @@ void loop()
     {
       if (receivedText[0] != DEVICE_RF_Id)
       {          
-        Serial.print("Received RF Data: ");
-        Serial.println(text);
+        ProcessIncomingMessage(receivedText);
       }
     }
   }
+}
+
+void ProcessIncomingMessage(String message)
+{
+  Serial.println(message);
+  
+  if (message.length() < 5)
+  {
+    Serial.print("Invalid Length: ");
+    Serial.println(message.length());
+    return;
+  }
+
+  if (message.substring(2, 4) != "T1")
+  {
+    Serial.print("Invalid Command");
+    Serial.println(message.substring(3, 4));
+    return;
+  }
+
+  double newTemperature = message.substring(5).toDouble();
+  waterPump.temperatureSet(newTemperature);
+  Serial.print("Setting new temperature to: ");
+  Serial.println(newTemperature);
 }
 
 void WriteDataToRF(String dataToSend)

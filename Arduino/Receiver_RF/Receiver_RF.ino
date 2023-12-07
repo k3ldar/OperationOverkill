@@ -82,7 +82,7 @@ void CommandReceived()
   if (commandMgr.getCommand() == "T1")
   {
     StringKeyValue argValue = commandMgr.getArgs(0);
-    String broadcastData = String("0/T1/") + String(argValue.key);
+    String broadcastData = String("0/T1/") + String(argValue.value);
     BroadcastRFData(broadcastData);
     return;
   }

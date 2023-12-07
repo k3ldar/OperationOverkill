@@ -16,6 +16,7 @@ namespace OpOverkillWebServer.Models
             Pump2Active = arduinoProcessor.Pump2Active;
             SensorValue = arduinoProcessor.SensorValue;
             SensorAverage = arduinoProcessor.SensorAverage;
+            Temperature = Math.Round(arduinoProcessor.Temperature, 2);
 
             Time = DateTime.Now.ToString("HH:mm:ss");
             WeatherData = WeatherUpdateThread.LatestWeatherData.CurrentData();
@@ -28,6 +29,8 @@ namespace OpOverkillWebServer.Models
         public int SensorValue { get; }
 
         public int SensorAverage { get; }
+
+        public double Temperature { get; }
 
         public string Time { get; }
 

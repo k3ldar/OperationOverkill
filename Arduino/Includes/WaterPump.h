@@ -11,7 +11,9 @@
 #define MinimumCutoffThreshold 370
 #define MinimumPumpTimeMs 4000
 #define MinimumWorkingTemperature 2.5
-#define TemperatureNotSet -100;
+#define TemperatureNotSet -99.9
+
+const unsigned long ValidTemperatureLength = 3600000; // 1 hour in ms
 
 typedef void RFCallback(String data);
 
@@ -30,6 +32,7 @@ private:
 	bool _pump1Active;
 	bool _pump2Active;
 	double _currentTemperature;
+	unsigned long _nextTemperatureCheck;
 	
 	unsigned long _myTime;
 	unsigned long _turnPump1OffMilli = 0;

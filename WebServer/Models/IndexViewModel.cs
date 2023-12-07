@@ -19,6 +19,7 @@ namespace OpOverkill.Models
             Pump2Active = arduinoProcessor.Pump2Active;
             SensorValue = arduinoProcessor.SensorValue;
             SensorAverage = arduinoProcessor.SensorAverage;
+            Temperature = arduinoProcessor.Temperature;
         }
 
         public bool Pump1Active { get; }
@@ -28,5 +29,7 @@ namespace OpOverkill.Models
         public int SensorValue { get; }
 
         public int SensorAverage { get; }
+
+        public double Temperature { get; }
     }
 }
