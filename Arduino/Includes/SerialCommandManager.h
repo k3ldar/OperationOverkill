@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <Arduino.h>
 #include <String.h>
-#include <MemoryFree.h>
-#include <Battery.h>
+#include "MemoryFree.h"
+#include "Battery.h"
 
 
 #if (defined(ARDUINO) && ARDUINO >= 155) || defined(ESP8266)
@@ -20,7 +20,7 @@ typedef struct StringKeyValue {
    String value;
 } keyAndValue;
 
-void commandReceived();
+typedef void MessageReceivedCallback();
 
 class SerialCommandManager
 {
@@ -29,20 +29,20 @@ private:
 	StringKeyValue _params[5];
 	int _paramCount;
 	String _rawMessage;
-	long _serialTimeout;
-	int _maximumMessageSize;
+	unsigned long _serialTimeout;
+	unsigned int _maximumMessageSize;
 	bool _messageComplete;
 	bool _messageTimeout;
 	char _terminator;
 	char _commandSeperator;
 	char _paramSeperator;
 	bool _isDebug;
-	void (*_messageReceived)();
+	MessageReceivedCallback *_messageReceivedCallback;
 	bool processMessage();
 	bool processBatteryMessage();
 	void sendMessage(String messageType, String message, String identifier);
 public:
-	SerialCommandManager(void (*commandReceived)(), char terminator, char commandSeperator, char paramSeperator, long timeoutMilliseconds, int maxMessageSize);
+	SerialCommandManager(MessageReceivedCallback *commandReceived, char terminator, char commandSeperator, char paramSeperator, unsigned long timeoutMilliseconds, unsigned int maxMessageSize);
 	void readCommands();
 	bool isTimeout();
 	bool isCompleteMessage();

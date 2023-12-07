@@ -2,13 +2,16 @@
 #define __WaterPump__
 
 #include <Arduino.h>
-#include <Queue.h>
+#include "Queue.h"
+#include "MemoryFree.h"
 
 #define ReadSensorMs 1000
 #define Relay_1_Threshold 400
 #define Relay_2_Threshold 420
 #define MinimumCutoffThreshold 370
 #define MinimumPumpTimeMs 4000
+#define MinimumWorkingTemperature 2.5
+#define TemperatureNotSet -100;
 
 typedef void RFCallback(String data);
 
@@ -26,6 +29,7 @@ private:
 	int _pump2Pin;
 	bool _pump1Active;
 	bool _pump2Active;
+	double _currentTemperature;
 	
 	unsigned long _myTime;
 	unsigned long _turnPump1OffMilli = 0;
@@ -47,11 +51,14 @@ public:
 			  const int pump2LEDPin,
 			  const int pump1Pin,
 			  const int pump2Pin);
+	~WaterPump();
 	
 	void initialize(RFCallback *rfCallback);
 	void process();
 	bool pump1Active();
 	bool pump2Active();
+	double temperatureGet();
+	void temperatureSet(double temperature);
 };
 
 #endif

@@ -19,13 +19,19 @@ WaterPump::WaterPump(
 	_pump2Pin = pump2Pin;
 	
 	_sensorValue = 0;
-	_myTime = 0;
-	
+	_myTime = 0;	
+}
+
+WaterPump::~WaterPump()
+{
+	Serial.println("WaterPump destroy");
+	delete(_queue);
 }
  
 void WaterPump::initialize(RFCallback *rfCallback)
 {
 	_rfCallback = rfCallback;
+	_currentTemperature = TemperatureNotSet;
 	pinMode(_sensorActivePin, OUTPUT);
 	pinMode(_sensorActiveLEDPin, OUTPUT);
 	pinMode(_pump1LEDPin, OUTPUT);
@@ -39,6 +45,17 @@ void WaterPump::initialize(RFCallback *rfCallback)
 	digitalWrite(_pump2LEDPin, LOW);
 	digitalWrite(_pump1Pin, LOW);
 	digitalWrite(_pump2Pin, LOW);
+}
+
+double WaterPump::temperatureGet()
+{
+	return _currentTemperature;
+}
+
+void WaterPump::temperatureSet(double temperature)
+{
+	if (_currentTemperature != temperature)
+		_currentTemperature = temperature;
 }
 
 void WaterPump::process()
@@ -59,7 +76,7 @@ void WaterPump::process()
           _queue->dequeue();
           
         _queue->enqueue(s1Value);
-        
+		
         if (s1Value != _sensorValue)
         {
             _sensorValue = s1Value;
@@ -75,7 +92,7 @@ void WaterPump::process()
 
         String combined = "1/WS/" + String(s1Value) + "/" + 
           String(average) + "/" +
-          //String(Temperature) + "/" + 
+          String(_currentTemperature) + "/" + 
           String(_pump1Active) + "/" +
           String(_pump2Active);
 

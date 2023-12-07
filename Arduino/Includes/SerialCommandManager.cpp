@@ -9,9 +9,9 @@
 // DEBUG:ON; -- turns debug mode on
 // DEBUG:OFF; -- turns debug mode off
 
-SerialCommandManager::SerialCommandManager(void (*commandReceived)(), char terminator, char commandSeperator, char paramSeperator, long timeoutMilliseconds, int maxMessageSize)
+SerialCommandManager::SerialCommandManager(MessageReceivedCallback *commandReceived, char terminator, char commandSeperator, char paramSeperator, unsigned long timeoutMilliseconds, unsigned int maxMessageSize)
 {
-	_messageReceived = commandReceived;
+	_messageReceivedCallback = commandReceived;
 	_terminator = terminator;
 	_commandSeperator = commandSeperator;
 	_paramSeperator = paramSeperator;
@@ -139,7 +139,7 @@ void SerialCommandManager::readCommands()
 		}
 
 		if (!processMessage())
-			_messageReceived();
+			_messageReceivedCallback();
 	}
 
 	YIELD;

@@ -1,8 +1,8 @@
 #include <SPI.h>
 #include <nRF24L01.h>
 #include <RF24.h>
-#include <MemoryFree.h>
-#include <WaterPump.h>
+#include "MemoryFree.h"
+#include "WaterPump.h"
 
 
 #define MAX_PACKET_SIZE 32
@@ -12,9 +12,6 @@ const byte RFAddresses[][6] = {
                                 "RF003"  // Weather station (not used here)
                               };
 const byte DEVICE_RF_Id = 49;
-
-
-#define NO_TEMPERATURE_DATA -100
 
 
 // water sensor pins
@@ -31,18 +28,8 @@ const byte DEVICE_RF_Id = 49;
 #define TEMP_UPDATE_MAX 1000 * 60 * 5
 
 
-//bool Relay1Active = false;
-//byte Relay1Readings = 0;
-//bool Relay2Active = false;
-int currentTemperature = NO_TEMPERATURE_DATA;
-
 WaterPump waterPump(WaterSensor_Signal_Pin, WaterSensor_Power_Pin, Sensor_Active_LED_PIN, Relay_1_LED_PIN, Relay_2_LED_PIN, Relay_1_PIN, Relay_2_PIN);
 RF24 radio(RF_CE_PIN, RF_CSN_PIN);
-
-
-
-//unsigned long _tempLastUpdated = millis()-
-
 
 void setup() 
 {
@@ -93,6 +80,6 @@ void WriteDataToRF(String dataToSend)
       Serial.println("Failed to write data");
     }
 
-    delay(5);
+    delay(10);
     radio.startListening();
 }

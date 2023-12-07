@@ -15,9 +15,8 @@ const byte RFAddresses[][6] = {
 #define RF_CE_PIN 9
 #define RF_CSN_PIN 10
 
-void CommandReceived();
 
-SerialCommandManager commandMgr(CommandReceived, '\n', ':', '=', 500, 256);
+SerialCommandManager commandMgr(&CommandReceived, '\n', ':', '=', 500, 256);
 
 RF24 radio(RF_CE_PIN, RF_CSN_PIN);
 
@@ -59,7 +58,7 @@ void CommandReceived()
   if (commandMgr.getCommand() == "SDRAT" && commandMgr.getArgCount() == 1)
   {
     StringKeyValue argValue = commandMgr.getArgs(0);
-    radio.setDataRate(argValue.key.toInt());
+    radio.setDataRate(static_cast<rf24_datarate_e>(argValue.key.toInt()));
   }
 
   if (commandMgr.getCommand() == "IPV")

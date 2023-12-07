@@ -2,9 +2,8 @@
 
 Queue::Queue(int capacity)
 {
-	Serial.print("Create Queue: ");
-	Serial.println(capacity);
-	
+	_front = NULL;
+	_rear = NULL;
     _capacity = capacity;
 	_size = 0;
 }
@@ -22,14 +21,12 @@ bool Queue::isEmpty()
     return (_size == 0);
 }
 
-// Function to add an item to the queue.
-// It changes rear and size
 void Queue::enqueue(int item)
 {
     if (isFull())
         return;
 	
-    _size++;
+   _size++;
 	QItem* temp = new QItem(item);
 	
 	if (_rear == NULL)
@@ -37,7 +34,7 @@ void Queue::enqueue(int item)
 		_front = _rear = temp;
 		return;
 	}
-	
+
     _rear->next = temp;
 	_rear = temp;
 }
@@ -62,20 +59,19 @@ int Queue::dequeue()
  
 int Queue::average()
 {
-    if (isEmpty())
+    if (isEmpty() || _front == NULL)
 	{
         return INT_MIN;
 	}
         
     int sum = 0;
- 
 	QItem* temp = _front;
-	do
+	
+	while (temp != NULL)
 	{
 		sum += temp->data;
 		temp = temp->next;
 	}
-	while (temp != NULL);
 	
     return (sum / _size);
 }
