@@ -94,7 +94,7 @@ void WaterPump::process()
 
         int average = _queue->average();
 
-        if (_queue->isFull())
+        if (_queue->isFull() && _currentTemperature >= MinimumWorkingTemperature)
         {
           processPump1(currTime, average);
           processPump2(currTime, average);

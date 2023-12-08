@@ -12,6 +12,8 @@
         public Hourly_Units hourly_units { get; set; }
         public Hourly hourly { get; set; }
 
+        public DateTime LastUpdated { get; set; }
+
         public CurrentWeatherData CurrentData()
         {
             CurrentWeatherData result = new();

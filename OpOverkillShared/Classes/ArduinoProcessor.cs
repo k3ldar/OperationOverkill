@@ -1,4 +1,7 @@
 ﻿using System.Collections.Concurrent;
+using System.Net.Http.Headers;
+
+using OpOverkillShared.Classes;
 
 namespace OpOverkillShared
 {
@@ -95,10 +98,20 @@ namespace OpOverkillShared
 
             set
             {
-                if (value == _temperature)
+                double newValue = value;
+
+                var weatherData = WeatherUpdateThread.LatestWeatherData.CurrentData();
+
+                if (newValue < -50 && weatherData != null && WeatherUpdateThread.LatestWeatherData.LastUpdated > DateTime.UtcNow.AddMinutes(-6))
+                {
+                    Double.TryParse(weatherData.Temperature_2m.Substring(0, weatherData.Temperature_2m.Length -2), out newValue);
+                    _comport.WriteLine($"T1:t={newValue--}");
+                }
+
+                if (newValue == _temperature)
                     return;
 
-                _temperature = value;
+                _temperature = newValue;
                 SensorTemperatureChanged?.Invoke(this, EventArgs.Empty);
             }
         }

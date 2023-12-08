@@ -13,23 +13,79 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpOverkillShared", "OpOverkillShared\OpOverkillShared.csproj", "{0E0BC5DD-1420-46F6-B3FB-62FE659937F2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Arduino", "Arduino", "{4C686A54-EE43-478E-A26E-60BD061149CF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WaterSensor", "WaterSensor", "{DBFFD195-D669-4ED8-8E0F-8894C2B517E6}"
+	ProjectSection(SolutionItems) = preProject
+		Arduino\WaterSensor\Queue.cpp = Arduino\WaterSensor\Queue.cpp
+		Arduino\WaterSensor\Queue.h = Arduino\WaterSensor\Queue.h
+		Arduino\WaterSensor\WaterPump.cpp = Arduino\WaterSensor\WaterPump.cpp
+		Arduino\WaterSensor\WaterPump.h = Arduino\WaterSensor\WaterPump.h
+		Arduino\WaterSensor\WaterSensor.ino = Arduino\WaterSensor\WaterSensor.ino
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RFReceiver", "RFReceiver", "{55EE19EC-C412-45AC-92AE-FF10CDF71E43}"
+	ProjectSection(SolutionItems) = preProject
+		Arduino\Receiver_RF\Battery.cpp = Arduino\Receiver_RF\Battery.cpp
+		Arduino\Receiver_RF\Battery.h = Arduino\Receiver_RF\Battery.h
+		Arduino\Receiver_RF\CommandMessage.cpp = Arduino\Receiver_RF\CommandMessage.cpp
+		Arduino\Receiver_RF\CommandMessage.h = Arduino\Receiver_RF\CommandMessage.h
+		Arduino\Receiver_RF\MemoryFree.cpp = Arduino\Receiver_RF\MemoryFree.cpp
+		Arduino\Receiver_RF\MemoryFree.h = Arduino\Receiver_RF\MemoryFree.h
+		Arduino\Receiver_RF\Receiver_RF.ino = Arduino\Receiver_RF\Receiver_RF.ino
+		Arduino\Receiver_RF\SerialCommandManager.cpp = Arduino\Receiver_RF\SerialCommandManager.cpp
+		Arduino\Receiver_RF\SerialCommandManager.h = Arduino\Receiver_RF\SerialCommandManager.h
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WeatherStation", "WeatherStation", "{F363F700-5C58-450F-8857-DA4CCFEF50C1}"
+	ProjectSection(SolutionItems) = preProject
+		Arduino\WeatherStation\WeatherStation.cpp = Arduino\WeatherStation\WeatherStation.cpp
+		Arduino\WeatherStation\WeatherStation.h = Arduino\WeatherStation\WeatherStation.h
+		Arduino\WeatherStation\WeatherStation.ino = Arduino\WeatherStation\WeatherStation.ino
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|ARM = Debug|ARM
+		Debug|ARM64 = Debug|ARM64
 		Release|Any CPU = Release|Any CPU
+		Release|ARM = Release|ARM
+		Release|ARM64 = Release|ARM64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{69922449-29A5-4B6E-95C0-FA98708DAA48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{69922449-29A5-4B6E-95C0-FA98708DAA48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69922449-29A5-4B6E-95C0-FA98708DAA48}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{69922449-29A5-4B6E-95C0-FA98708DAA48}.Debug|ARM.Build.0 = Debug|Any CPU
+		{69922449-29A5-4B6E-95C0-FA98708DAA48}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{69922449-29A5-4B6E-95C0-FA98708DAA48}.Debug|ARM64.Build.0 = Debug|Any CPU
 		{69922449-29A5-4B6E-95C0-FA98708DAA48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69922449-29A5-4B6E-95C0-FA98708DAA48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69922449-29A5-4B6E-95C0-FA98708DAA48}.Release|ARM.ActiveCfg = Release|Any CPU
+		{69922449-29A5-4B6E-95C0-FA98708DAA48}.Release|ARM.Build.0 = Release|Any CPU
+		{69922449-29A5-4B6E-95C0-FA98708DAA48}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{69922449-29A5-4B6E-95C0-FA98708DAA48}.Release|ARM64.Build.0 = Release|Any CPU
 		{0E0BC5DD-1420-46F6-B3FB-62FE659937F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0E0BC5DD-1420-46F6-B3FB-62FE659937F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E0BC5DD-1420-46F6-B3FB-62FE659937F2}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{0E0BC5DD-1420-46F6-B3FB-62FE659937F2}.Debug|ARM.Build.0 = Debug|Any CPU
+		{0E0BC5DD-1420-46F6-B3FB-62FE659937F2}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{0E0BC5DD-1420-46F6-B3FB-62FE659937F2}.Debug|ARM64.Build.0 = Debug|Any CPU
 		{0E0BC5DD-1420-46F6-B3FB-62FE659937F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E0BC5DD-1420-46F6-B3FB-62FE659937F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E0BC5DD-1420-46F6-B3FB-62FE659937F2}.Release|ARM.ActiveCfg = Release|Any CPU
+		{0E0BC5DD-1420-46F6-B3FB-62FE659937F2}.Release|ARM.Build.0 = Release|Any CPU
+		{0E0BC5DD-1420-46F6-B3FB-62FE659937F2}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{0E0BC5DD-1420-46F6-B3FB-62FE659937F2}.Release|ARM64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DBFFD195-D669-4ED8-8E0F-8894C2B517E6} = {4C686A54-EE43-478E-A26E-60BD061149CF}
+		{55EE19EC-C412-45AC-92AE-FF10CDF71E43} = {4C686A54-EE43-478E-A26E-60BD061149CF}
+		{F363F700-5C58-450F-8857-DA4CCFEF50C1} = {4C686A54-EE43-478E-A26E-60BD061149CF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1B2796DA-AC39-4D97-88A5-C0B691D8C4D0}

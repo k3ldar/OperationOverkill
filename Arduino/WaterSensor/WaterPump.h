@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include "Queue.h"
-#include "MemoryFree.h"
 
 #define ReadSensorMs 1000
 #define Relay_1_Threshold 400
@@ -17,7 +16,8 @@ const unsigned long ValidTemperatureLength = 3600000; // 1 hour in ms
 
 typedef void RFCallback(String data);
 
-class WaterPump {
+class WaterPump
+{
 private:
 	Queue *_queue;
 	RFCallback *_rfCallback;
