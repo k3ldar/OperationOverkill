@@ -3,6 +3,8 @@ using System.Net.Http.Headers;
 
 using OpOverkillShared.Classes;
 
+using Shared.Classes;
+
 namespace OpOverkillShared
 {
     public sealed class ArduinoProcessor : IArduinoProcessor
@@ -14,10 +16,12 @@ namespace OpOverkillShared
         private int _sensorAverage = 0;
         private double _temperature = -99.9;
 
-        public ArduinoProcessor(WindowsComPort comPort)
+        public ArduinoProcessor(WindowsComPort comPort, ApiWrapper apiWrapper)
         {
-            _comport = comPort ?? throw new ArgumentNullException(nameof(comPort));
+            WeatherUpdateThread weatherUpdateThread = new(apiWrapper, this);
+            ThreadManager.ThreadStart(weatherUpdateThread, "Weather Update Thread", ThreadPriority.BelowNormal);
 
+            _comport = comPort ?? throw new ArgumentNullException(nameof(comPort));
             _comport.DataReceived += Comport_DataReceived;
         }
 
@@ -102,10 +106,10 @@ namespace OpOverkillShared
 
                 var weatherData = WeatherUpdateThread.LatestWeatherData.CurrentData();
 
-                if (newValue < -50 && weatherData != null && WeatherUpdateThread.LatestWeatherData.LastUpdated > DateTime.UtcNow.AddMinutes(-6))
+                if (_temperature < -50 && weatherData != null && WeatherUpdateThread.LatestWeatherData.LastUpdated > DateTime.UtcNow.AddMinutes(-6))
                 {
                     Double.TryParse(weatherData.Temperature_2m.Substring(0, weatherData.Temperature_2m.Length -2), out newValue);
-                    _comport.WriteLine($"T1:t={newValue--}");
+                    _comport.WriteLine($"T1:t={newValue}");
                 }
 
                 if (newValue == _temperature)

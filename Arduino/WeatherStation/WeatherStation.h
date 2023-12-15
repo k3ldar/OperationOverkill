@@ -4,26 +4,32 @@
 #include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <Temperature_LM75_Derived.h>
+#include "RFCommunicationManager.h"
 
 #define MillisBetweenSensorReading 1000;
-
-typedef void RFCallback(String data);
 
 class WeatherStation
 {
 private:
-	RFCallback *_rfCallback;
+	RFCommunicationManager *_rfCommandMgr;
+  Generic_LM75 *_lm75;
 	OneWire *_oneWire;
 	DallasTemperature *_tempSensor;
 	int _tempSensorSignalPin;
 	double _currentTemperature;
 	float _tempCelsius;
 
+  int _rainSensorAnalogPin;
+
 	unsigned long _nextUpdateTime;
+
+  void readTemperatureSensor();
+  void readRainSensor();
 public:
-	WeatherStation(int tempSensorSignalPin);
+	WeatherStation(int tempSensorSignalPin, int rainSensorAnalogPin);
 	~WeatherStation();
-	void initialize(RFCallback *rfCallback);
+	void initialize(RFCommunicationManager *rfCommandMgr);
 	void process();
 };
 

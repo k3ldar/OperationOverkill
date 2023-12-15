@@ -15,6 +15,7 @@ namespace OpOverkillShared
             services.AddTransient<IProcessorMediator, ProcessorMediator>();
             services.AddSingleton<WindowsComPort>();
             services.AddSingleton<ISettingsProvider, DefaultSettingProvider>();
+            services.AddTransient<ApiWrapper>();
         }
 
         public void Finalise()

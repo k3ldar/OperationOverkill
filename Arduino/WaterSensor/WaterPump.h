@@ -9,7 +9,7 @@
 #define Relay_2_Threshold 420
 #define MinimumCutoffThreshold 370
 #define MinimumPumpTimeMs 4000
-#define MinimumWorkingTemperature 2.5
+#define MinimumWorkingTemperature 1.0
 #define TemperatureNotSet -99.9
 
 const unsigned long ValidTemperatureLength = 3600000; // 1 hour in ms

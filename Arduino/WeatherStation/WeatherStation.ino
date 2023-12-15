@@ -2,39 +2,66 @@
 #include <nRF24L01.h>
 #include <RF24.h>
 
+#include "SerialCommandManager.h"
+#include "RFCommunicationManager.h"
 #include "WeatherStation.h"
 
-#define MAX_PACKET_SIZE 32
-const byte RFAddresses[][6] = { 
-                                "RF001", // Main receiver (this) (read)
-                                "RF002", // Water sensor (not used here)
-                                "RF003"  // Weather station (this) (write)
-                              };
+char SenderId = 1;
+const byte readAddress[5] = {'R','F','0','0','B'};
+const byte writeAddress[5] = {'R','F','0','0','A'};
 
-const byte DEVICE_RF_Id = 50;
+
+const byte DEVICE_RF_Id = 68;
 #define RF_CE_PIN 9
 #define RF_CSN_PIN 10
 
-#define TEMP_SENSOR_PIN 8
+#define TEMP_SENSOR_PIN 4
+#define RAIN_SENSOR_ANALOG_PIN A0
 
-WeatherStation weatherStation(TEMP_SENSOR_PIN);
 RF24 radio(RF_CE_PIN, RF_CSN_PIN);
+SerialCommandManager commandMgr(&CommandReceived, '\n', ':', '=', 500, 256);
+RFCommunicationManager rfCommandMgr(SenderId, false, &radio);
+WeatherStation weatherStation(TEMP_SENSOR_PIN, RAIN_SENSOR_ANALOG_PIN);
+
+
+void CommandReceived()
+{
+}
+
+void connectToRadio()
+{
+  bool isConnected = radio.begin();
+  if (!isConnected)
+  {
+    Serial.println("Radio not responding");
+	  return;
+  }
+  
+  radio.setPALevel(RF24_PA_MAX);
+  radio.setDataRate(RF24_250KBPS);
+  radio.setRetries(5, 5);
+
+  radio.openWritingPipe(writeAddress);
+
+  radio.openReadingPipe(1, readAddress);
+
+  radio.startListening();
+  
+  Serial.print("Data rate: ");
+  Serial.println(radio.getDataRate());
+  Serial.print("Ip Variant: ");
+  Serial.println(radio.isPVariant());
+}
 
 void setup()
 {
   Serial.begin(115200);
+  while (!Serial);
   
-  weatherStation.initialize(&WriteDataToRF);
+  connectToRadio();
 
-  if (!radio.begin())
-    Serial.println("Radio not responding");
-
-  radio.setRetries(6, 4);
-  radio.openWritingPipe(RFAddresses[2]);
-  radio.openReadingPipe(1, RFAddresses[0]);
-  radio.setPALevel(RF24_PA_MAX);
-  radio.setDataRate(RF24_1MBPS);
-  radio.startListening();
+  rfCommandMgr.initialize();
+  weatherStation.initialize(&rfCommandMgr);
 }
 
 
@@ -67,42 +94,11 @@ void ProcessIncomingMessage(String message)
   Serial.println(newTemperature);
 }
 
-void WriteDataToRF(String dataToSend)
-{
-    char data[MAX_PACKET_SIZE] = "";
-    dataToSend.toCharArray(data, MAX_PACKET_SIZE);
-
-    radio.stopListening();
-    if (!radio.write(&data, MAX_PACKET_SIZE))
-    {
-      Serial.println("Failed to write data");
-    }
-
-    delay(10);
-    radio.startListening();
-}
-
 void loop()
 {
+  commandMgr.readCommands();
   weatherStation.process();
-
-  if (radio.available())
-  {
-    char text[MAX_PACKET_SIZE] = "";
-    radio.read(&text, MAX_PACKET_SIZE);
-    String receivedText = String(text);
-    
-    if (receivedText.length() > 0)
-    {
-      if (receivedText[0] != DEVICE_RF_Id)
-      {
-        Serial.print("Ignoring: ");
-        Serial.println(receivedText);
-      }
-      else
-      {          
-        ProcessIncomingMessage(receivedText);
-      }
-    }
-  }
+  rfCommandMgr.process();
 }
+
+

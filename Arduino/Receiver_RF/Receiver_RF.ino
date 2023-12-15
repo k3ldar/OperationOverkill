@@ -1,38 +1,43 @@
 #include <SPI.h>             /* to handle the communication interface with the modem*/
 #include <nRF24L01.h>        /* to handle this particular modem driver*/
 #include <RF24.h>            /* the library which helps us to control the radio modem*/
+
 #include "SerialCommandManager.h"
+#include "RFCommunicationManager.h"
 
 
-#define MAX_PACKET_SIZE 32
-const byte RFAddresses[][6] = { 
-                                "RF001", // Main receiver (this) (write)
-                                "RF002", // Water sensor (read)
-                                "RF003"  // Weather station (read)
-                              };
+
+char SenderId = 0;
+const byte readAddress[5] = {'R','F','0','0','A'};
+const byte writeAddress[5] = {'R','F','0','0','B'};
+
 
 
 #define RF_CE_PIN 9
 #define RF_CSN_PIN 10
 
-
-SerialCommandManager commandMgr(&CommandReceived, '\n', ':', '=', 500, 256);
-
 RF24 radio(RF_CE_PIN, RF_CSN_PIN);
+SerialCommandManager commandMgr(&CommandReceived, '\n', ':', '=', 500, 256);
+RFCommunicationManager rfCommandMgr(SenderId, true, &radio);
+unsigned long nextSend = 0;
 
-
-void setup()
+void connectToRadio()
 {
-  Serial.begin(115200);
-  
-  if (!radio.begin())
+  bool isConnected = radio.begin();
+  if (!isConnected)
+  {
     Serial.println("Radio not responding");
-
-  radio.openWritingPipe(RFAddresses[0]);
-  radio.openReadingPipe(1, RFAddresses[1]);
-  radio.openReadingPipe(2, RFAddresses[2]);
+	  return;
+  }
+  
   radio.setPALevel(RF24_PA_MAX);
-  radio.setDataRate(RF24_1MBPS);
+  radio.setDataRate(RF24_250KBPS);
+  radio.setRetries(5, 5);
+
+  radio.openWritingPipe(writeAddress);
+
+  radio.openReadingPipe(1, readAddress);
+
   radio.startListening();
   
   Serial.print("Data rate: ");
@@ -41,17 +46,27 @@ void setup()
   Serial.println(radio.isPVariant());
 }
 
+void setup()
+{
+  Serial.begin(115200);
+  while (!Serial);
+
+  connectToRadio();
+  rfCommandMgr.initialize(); 
+}
+
 void CommandReceived()
 {
+  /*
   if (commandMgr.getCommand() == "CHIP")
   {
-    commandMgr.sendCommand("CHIP", String(radio.isChipConnected()));
+    commandMgr.sendCommand("CHIP", String(rfCommandMgr.isChipConnected()));
     return;
   }
   
   if (commandMgr.getCommand() == "DRAT")
   {
-    commandMgr.sendCommand("DRAT", String(radio.getDataRate()));
+    commandMgr.sendCommand("DRAT", String(rfCommandMgr.getDataRate()));
     return;
   }
 
@@ -63,7 +78,7 @@ void CommandReceived()
 
   if (commandMgr.getCommand() == "IPV")
   {
-    commandMgr.sendCommand("IPV", String(radio.isPVariant()));
+    commandMgr.sendCommand("IPV", String(rfCommandMgr.isPVariant()));
     return;
   }
 
@@ -83,45 +98,29 @@ void CommandReceived()
   {
     StringKeyValue argValue = commandMgr.getArgs(0);
     String broadcastData = String("0/T1/") + String(argValue.value);
-    BroadcastRFData(broadcastData);
+    broadcastRFData(broadcastData);
     return;
   }
-  
+  */
   commandMgr.sendDebug("UNKNOWN", commandMgr.getCommand());
 }
 
-void BroadcastRFData(String data)
-{
-  char rfData[MAX_PACKET_SIZE] = "";
-  data.toCharArray(rfData, MAX_PACKET_SIZE);
-
-  radio.stopListening();
-
-  if (!radio.write(&rfData, MAX_PACKET_SIZE, true))
-  {
-    Serial.print("Failed to broadcast data: ");
-    Serial.println(data);
-  }
-  
-  delay(5);
-  
-  radio.startListening();
-}
 
 void loop()
 {
     commandMgr.readCommands();
 
-    if (radio.available())
+    if (rfCommandMgr.isInitialized())
     {
-        char text[MAX_PACKET_SIZE] = "";
-        radio.read(&text, MAX_PACKET_SIZE);
-        String receivedText = String(text);
-        
-        if (receivedText.length() > 0)
-        {
-          BroadcastRFData(text);
-          commandMgr.sendCommand("RF", text);
-        }
+      rfCommandMgr.process();
+
+    }
+
+    unsigned long currMillis = millis();
+    if (currMillis > nextSend)
+    {
+      RFPacket data;
+      data.senderId = 123;
+      radio.write(&data, sizeof(RFPacket));
     }
 }

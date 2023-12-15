@@ -42,8 +42,6 @@ namespace OpOverkill
             };
 #pragma warning restore S4830 // Server certificates should be verified during SSL/TLS connections
 
-            WeatherUpdateThread weatherUpdateThread = new(new ApiWrapper());
-            ThreadManager.ThreadStart(weatherUpdateThread, "Weather Update Thread", System.Threading.ThreadPriority.BelowNormal);
             Logger logger = new();
 
             AppDomain.CurrentDomain.FirstChanceException += (sender, eventArgs) =>

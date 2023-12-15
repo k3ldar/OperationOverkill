@@ -6,38 +6,16 @@ namespace OpOverkillShared
 {
     public sealed class WindowsComPort
     {
-        private readonly SerialPort _serialPort;
+        private SerialPort _serialPort;
+        private readonly ISettingsProvider _settingsProvider;
 
         public WindowsComPort(ISettingsProvider settingsProvider)
         {
-            Settings settings = settingsProvider.GetSettings<Settings>("ComSettings");
-
-
-            Name = settings.ComPort;
-
-            if (!Enum.TryParse<Parity>(settings.Parity, out Parity parity))
-                parity = Parity.None;
-
-            if (!Enum.TryParse<StopBits>(settings.StopBits, out StopBits stopBits))
-                stopBits = StopBits.One;
-
-            _serialPort = new SerialPort(settings.ComPort, settings.BaudRate,
-                parity, settings.DataBits, stopBits);
-
-#if DEBUG
-            _serialPort.ReadTimeout = settings.ReadTimeout * 5;
-            _serialPort.WriteTimeout = settings.WriteTimeout * 5;
-#else
-            _serialPort.ReadTimeout = settings.ReadTimeout;
-            _serialPort.WriteTimeout = settings.WriteTimeout;
-#endif
-
-            _serialPort.DataReceived += SerialPort_DataReceived;
-            _serialPort.ErrorReceived += SerialPort_ErrorReceived;
-            _serialPort.PinChanged += SerialPort_PinChanged;
+            _settingsProvider = settingsProvider ?? throw new ArgumentNullException(nameof(settingsProvider));
+            UpdateSerialPortFromSettings();
         }
 
-        public string Name { get; }
+        public string Name { get; private set; }
 
         public void Close()
         {
@@ -56,12 +34,19 @@ namespace OpOverkillShared
         {
             if (!IsOpen())
             {
-                _serialPort.Open();
-
-                //discard initial bytes
-                if (_serialPort.BytesToRead > 0)
+                try
                 {
-                    _ = _serialPort.ReadExisting();
+                    _serialPort.Open();
+
+                    //discard initial bytes
+                    if (_serialPort.BytesToRead > 0)
+                    {
+                        _ = _serialPort.ReadExisting();
+                    }
+                }
+                catch(FileNotFoundException)
+                {
+                    UpdateSerialPortFromSettings();
                 }
             }
         }
@@ -102,6 +87,36 @@ namespace OpOverkillShared
         public event SerialPinChangedEventHandler PinChanged;
 
         public event EventHandler DataReceived;
+
+
+        private void UpdateSerialPortFromSettings()
+        {
+            Settings settings = _settingsProvider.GetSettings<Settings>("ComSettings");
+
+
+            Name = settings.ComPort;
+
+            if (!Enum.TryParse<Parity>(settings.Parity, out Parity parity))
+                parity = Parity.None;
+
+            if (!Enum.TryParse<StopBits>(settings.StopBits, out StopBits stopBits))
+                stopBits = StopBits.One;
+
+            _serialPort = new SerialPort(settings.ComPort, settings.BaudRate,
+                parity, settings.DataBits, stopBits);
+
+#if DEBUG
+            _serialPort.ReadTimeout = settings.ReadTimeout * 5;
+            _serialPort.WriteTimeout = settings.WriteTimeout * 5;
+#else
+            _serialPort.ReadTimeout = settings.ReadTimeout;
+            _serialPort.WriteTimeout = settings.WriteTimeout;
+#endif
+
+            _serialPort.DataReceived += SerialPort_DataReceived;
+            _serialPort.ErrorReceived += SerialPort_ErrorReceived;
+            _serialPort.PinChanged += SerialPort_PinChanged;
+        }
 
         private void SerialPort_PinChanged(object sender, SerialPinChangedEventArgs e) => PinChanged?.Invoke(sender, e);
 
