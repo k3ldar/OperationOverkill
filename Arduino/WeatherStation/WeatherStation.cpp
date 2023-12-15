@@ -19,18 +19,6 @@ void WeatherStation::initialize(RFCommunicationManager *rfCommandMgr)
 {
 	_rfCommandMgr = rfCommandMgr;
   Wire.begin();      
-  /*
-  Serial.print("Found ");
-  Serial.print(_tempSensor->getDeviceCount(), DEC);
-  Serial.println(" devices.");
-
-  // report parasite power requirements
-  Serial.print("Parasite power is: "); 
-  if (_tempSensor->isParasitePowerMode())
-    Serial.println("ON");
-  else
-    Serial.println("OFF");
-*/
 }
 
 void WeatherStation::process()
@@ -49,7 +37,7 @@ void WeatherStation::readTemperatureSensor()
 {
 		_currentTemperature = _lm75->readTemperatureC();
 
-		String updateTemp = "2/T1/" +
+		String updateTemp = "Current Temp: " +
 			String(_currentTemperature);
 		Serial.println(updateTemp);
 

@@ -6,7 +6,7 @@
 #include "RFCommunicationManager.h"
 #include "WeatherStation.h"
 
-char SenderId = 1;
+char SenderId = '1';
 const byte readAddress[5] = {'R','F','0','0','B'};
 const byte writeAddress[5] = {'R','F','0','0','A'};
 
@@ -38,7 +38,7 @@ void connectToRadio()
   }
   
   radio.setPALevel(RF24_PA_MAX);
-  radio.setDataRate(RF24_250KBPS);
+  radio.setDataRate(RF24_1MBPS);
   radio.setRetries(5, 5);
 
   radio.openWritingPipe(writeAddress);

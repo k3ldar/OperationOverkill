@@ -5,7 +5,7 @@
 #include <Temperature_LM75_Derived.h>
 #include "RFCommunicationManager.h"
 
-#define MillisBetweenSensorReading 1000;
+#define MillisBetweenSensorReading 1500;
 
 class WeatherStation
 {

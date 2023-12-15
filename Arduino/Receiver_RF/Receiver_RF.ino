@@ -7,7 +7,7 @@
 
 
 
-char SenderId = 0;
+char SenderId = '0';
 const byte readAddress[5] = {'R','F','0','0','A'};
 const byte writeAddress[5] = {'R','F','0','0','B'};
 
@@ -31,7 +31,7 @@ void connectToRadio()
   }
   
   radio.setPALevel(RF24_PA_MAX);
-  radio.setDataRate(RF24_250KBPS);
+  radio.setDataRate(RF24_1MBPS);
   radio.setRetries(5, 5);
 
   radio.openWritingPipe(writeAddress);
