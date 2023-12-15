@@ -6,8 +6,6 @@ WeatherStation::WeatherStation(const int tempSensorSignalPin, int rainSensorAnal
   _lm75 = new Generic_LM75;
 	_tempSensorSignalPin = tempSensorSignalPin;
   _rainSensorAnalogPin = rainSensorAnalogPin;
-	_oneWire = new OneWire(_tempSensorSignalPin);
-	_tempSensor = new DallasTemperature(_oneWire);
 	_currentTemperature = -66.0;
 	_nextUpdateTime = millis() + 5000;
 }
@@ -20,7 +18,6 @@ WeatherStation::~WeatherStation()
 void WeatherStation::initialize(RFCommunicationManager *rfCommandMgr)
 {
 	_rfCommandMgr = rfCommandMgr;
-	_tempSensor->begin();
   Wire.begin();      
   /*
   Serial.print("Found ");
@@ -50,12 +47,7 @@ void WeatherStation::process()
 
 void WeatherStation::readTemperatureSensor()
 {
-  Serial.print("LM75 Temp: ");
-  Serial.println(_lm75->readTemperatureC());
-		if (_currentTemperature < -10)
-			_currentTemperature += 0.5;
-		else
-			_currentTemperature = -56.7;
+		_currentTemperature = _lm75->readTemperatureC();
 
 		String updateTemp = "2/T1/" +
 			String(_currentTemperature);
@@ -73,13 +65,6 @@ void WeatherStation::readTemperatureSensor()
       Serial.print("IsConnected: ");
       Serial.println(_rfCommandMgr->isInitialized());
     }
-
-		_tempSensor->requestTemperatures();
-		_tempCelsius = static_cast<double>(_tempSensor->getTempCByIndex(0));
-
-		Serial.print("Temperature: ");
-		Serial.print(_tempCelsius);
-		Serial.println("C");
 }
 
 void WeatherStation::readRainSensor()

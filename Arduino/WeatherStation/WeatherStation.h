@@ -2,8 +2,6 @@
 #define __WeatherStation__
 
 #include <Arduino.h>
-#include <OneWire.h>
-#include <DallasTemperature.h>
 #include <Temperature_LM75_Derived.h>
 #include "RFCommunicationManager.h"
 
@@ -14,8 +12,6 @@ class WeatherStation
 private:
 	RFCommunicationManager *_rfCommandMgr;
   Generic_LM75 *_lm75;
-	OneWire *_oneWire;
-	DallasTemperature *_tempSensor;
 	int _tempSensorSignalPin;
 	double _currentTemperature;
 	float _tempCelsius;
