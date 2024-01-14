@@ -23,6 +23,21 @@ SerialCommandManager commandMgr(&CommandReceived, '\n', ':', '=', 500, 256);
 RFCommunicationManager rfCommandMgr(SenderId, false, &radio);
 WeatherStation weatherStation(TEMP_SENSOR_PIN, RAIN_SENSOR_ANALOG_PIN);
 
+void SendMessage(String message, MessageType messageType)
+{
+  switch (messageType)
+  {
+    case Debug:
+      commandMgr.sendDebug(message, "WS");
+      return;
+    case Error:
+      commandMgr.sendError(message, "WS");
+      return;
+    default:
+      commandMgr.sendCommand("WS", message);
+      return;
+  }
+}
 
 void CommandReceived()
 {
@@ -57,11 +72,10 @@ void setup()
 {
   Serial.begin(115200);
   while (!Serial);
-  
   connectToRadio();
 
-  rfCommandMgr.initialize();
-  weatherStation.initialize(&rfCommandMgr);
+  rfCommandMgr.initialize(&SendMessage);
+  weatherStation.initialize(&SendMessage, &rfCommandMgr);
 }
 
 

@@ -21,6 +21,22 @@ SerialCommandManager commandMgr(&CommandReceived, '\n', ':', '=', 500, 256);
 RFCommunicationManager rfCommandMgr(SenderId, true, &radio);
 unsigned long nextSend = 0;
 
+void SendMessage(String message, MessageType messageType)
+{
+  switch (messageType)
+  {
+    case Debug:
+      commandMgr.sendDebug(message, "RFR");
+      return;
+    case Error:
+      commandMgr.sendError(message, "RFR");
+      return;
+    default:
+      commandMgr.sendCommand("RFR", message);
+      return;
+  }
+}
+
 void connectToRadio()
 {
   bool isConnected = radio.begin();
@@ -52,7 +68,7 @@ void setup()
   while (!Serial);
 
   connectToRadio();
-  rfCommandMgr.initialize(); 
+  rfCommandMgr.initialize(&SendMessage); 
 }
 
 void CommandReceived()
@@ -113,7 +129,6 @@ void loop()
     if (rfCommandMgr.isInitialized())
     {
       rfCommandMgr.process();
-
     }
 
     unsigned long currMillis = millis();
