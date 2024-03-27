@@ -8,12 +8,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 using OpOverkill.Internal;
 
-using OpOverkillShared;
+using OpOverkillShared.DB;
 using OpOverkillShared.Classes;
 
 using PluginManager.Abstractions;
 
 using SharedPluginFeatures;
+
+using SimpleDB;
 
 namespace OpOverkill
 {

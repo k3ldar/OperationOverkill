@@ -14,12 +14,20 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <Compile Remove="Internal\MenuItems\**" />
+    <Compile Remove="Internal\Timings\**" />
     <Compile Remove="Views\Account\**" />
     <Compile Remove="Views\SystemAdmin\**" />
+    <Content Remove="Internal\MenuItems\**" />
+    <Content Remove="Internal\Timings\**" />
     <Content Remove="Views\Account\**" />
     <Content Remove="Views\SystemAdmin\**" />
+    <EmbeddedResource Remove="Internal\MenuItems\**" />
+    <EmbeddedResource Remove="Internal\Timings\**" />
     <EmbeddedResource Remove="Views\Account\**" />
     <EmbeddedResource Remove="Views\SystemAdmin\**" />
+    <None Remove="Internal\MenuItems\**" />
+    <None Remove="Internal\Timings\**" />
     <None Remove="Views\Account\**" />
     <None Remove="Views\SystemAdmin\**" />
   </ItemGroup>
@@ -88,8 +96,6 @@
 
   <ItemGroup>
     <Folder Include="Api\" />
-    <Folder Include="Internal\MenuItems\" />
-    <Folder Include="Internal\Timings\" />
   </ItemGroup>
   
   <Target Name="CopyDepsFiles" AfterTargets="Build" Condition="'$(TargetFramework)'!=''">

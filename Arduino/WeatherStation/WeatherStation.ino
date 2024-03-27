@@ -6,21 +6,31 @@
 #include "RFCommunicationManager.h"
 #include "WeatherStation.h"
 
-char SenderId = '1';
-const byte readAddress[5] = {'R','F','0','0','B'};
-const byte writeAddress[5] = {'R','F','0','0','A'};
-
+// test box com 6
 
 const byte DEVICE_RF_Id = 68;
-#define RF_CE_PIN 9
-#define RF_CSN_PIN 10
+#define RF_CE_PIN 8
+#define RF_CSN_PIN 9
 
-#define TEMP_SENSOR_PIN 4
+#define TEMP_SENSOR_PIN 7
+#define RAIN_SENSOR_ANALOG_PIN A0
+
+
+
+char SenderId = '1';
+const byte readAddress[6] = {'R','F','0','0','B'};
+const byte writeAddress[6] = {'R','F','0','0','A'};
+
+// test box com 6
+
+
+bool isStarting = true;
+#define TEMP_SENSOR_PIN 7
 #define RAIN_SENSOR_ANALOG_PIN A0
 
 RF24 radio(RF_CE_PIN, RF_CSN_PIN);
 SerialCommandManager commandMgr(&CommandReceived, '\n', ':', '=', 500, 256);
-RFCommunicationManager rfCommandMgr(SenderId, false, &radio);
+RFCommunicationManager rfCommandMgr(&SendMessage, SenderId, false, &radio);
 WeatherStation weatherStation(TEMP_SENSOR_PIN, RAIN_SENSOR_ANALOG_PIN);
 
 void SendMessage(String message, MessageType messageType)
@@ -43,39 +53,15 @@ void CommandReceived()
 {
 }
 
-void connectToRadio()
-{
-  bool isConnected = radio.begin();
-  if (!isConnected)
-  {
-    Serial.println("Radio not responding");
-	  return;
-  }
-  
-  radio.setPALevel(RF24_PA_MAX);
-  radio.setDataRate(RF24_1MBPS);
-  radio.setRetries(5, 5);
-
-  radio.openWritingPipe(writeAddress);
-
-  radio.openReadingPipe(1, readAddress);
-
-  radio.startListening();
-  
-  Serial.print("Data rate: ");
-  Serial.println(radio.getDataRate());
-  Serial.print("Ip Variant: ");
-  Serial.println(radio.isPVariant());
-}
 
 void setup()
 {
   Serial.begin(115200);
   while (!Serial);
-  connectToRadio();
-
-  rfCommandMgr.initialize(&SendMessage);
+  Serial.println("setup called");
   weatherStation.initialize(&SendMessage, &rfCommandMgr);
+  rfCommandMgr.connectToRadio(readAddress, writeAddress);
+  isStarting = false;
 }
 
 
@@ -110,6 +96,11 @@ void ProcessIncomingMessage(String message)
 
 void loop()
 {
+  if (rfCommandMgr.canReconnect())
+  {
+    rfCommandMgr.connectToRadio(readAddress, writeAddress);
+  }
+
   commandMgr.readCommands();
   weatherStation.process();
   rfCommandMgr.process();

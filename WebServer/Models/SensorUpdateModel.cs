@@ -19,7 +19,9 @@ namespace OpOverkillWebServer.Models
             Temperature = Math.Round(arduinoProcessor.Temperature, 2);
 
             Time = DateTime.Now.ToString("HH:mm:ss");
-            WeatherData = WeatherUpdateThread.LatestWeatherData.CurrentData();
+
+            if (WeatherUpdateThread.LatestWeatherData != null)
+                WeatherData = WeatherUpdateThread.LatestWeatherData.CurrentData();
         }
 
         public bool Pump1Active { get; }

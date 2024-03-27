@@ -32,16 +32,19 @@ namespace OpOverkillShared.Classes
             {
                 OpenMeteoApiJson newWeatherData = apiWrapper.CallGetApi<OpenMeteoApiJson>(_uri);
 
-                using (TimedLock tl = TimedLock.Lock(_lockObject))
+                if (newWeatherData != null)
                 {
-                    newWeatherData.LastUpdated = DateTime.UtcNow;
-                    _latestJson = newWeatherData;
-
-                    if (_arduinoProcessor.Temperature < -50 && 
-                        Double.TryParse(newWeatherData.CurrentData().Temperature_2m.Substring(0, newWeatherData.CurrentData().Temperature_2m.Length - 2), out double temp) &&
-                        _arduinoProcessor is ArduinoProcessor arduinoProcessor)
+                    using (TimedLock tl = TimedLock.Lock(_lockObject))
                     {
-                        arduinoProcessor.Temperature = temp;
+                        newWeatherData.LastUpdated = DateTime.UtcNow;
+                        _latestJson = newWeatherData;
+
+                        if (_arduinoProcessor.Temperature < -50 &&
+                            Double.TryParse(newWeatherData.CurrentData().Temperature_2m.Substring(0, newWeatherData.CurrentData().Temperature_2m.Length - 2), out double temp) &&
+                            _arduinoProcessor is ArduinoProcessor arduinoProcessor)
+                        {
+                            arduinoProcessor.Temperature = temp;
+                        }
                     }
                 }
             }

@@ -8,17 +8,17 @@
 
 
 char SenderId = '0';
-const byte readAddress[5] = {'R','F','0','0','A'};
-const byte writeAddress[5] = {'R','F','0','0','B'};
+const byte readAddress[6] = {'R','F','0','0','A'};
+const byte writeAddress[6] = {'R','F','0','0','B'};
 
-
+// Test Box Com 9
 
 #define RF_CE_PIN 9
 #define RF_CSN_PIN 10
 
 RF24 radio(RF_CE_PIN, RF_CSN_PIN);
 SerialCommandManager commandMgr(&CommandReceived, '\n', ':', '=', 500, 256);
-RFCommunicationManager rfCommandMgr(SenderId, true, &radio);
+RFCommunicationManager rfCommandMgr(&SendMessage, SenderId, true, &radio);
 unsigned long nextSend = 0;
 
 void SendMessage(String message, MessageType messageType)
@@ -37,38 +37,13 @@ void SendMessage(String message, MessageType messageType)
   }
 }
 
-void connectToRadio()
-{
-  bool isConnected = radio.begin();
-  if (!isConnected)
-  {
-    Serial.println("Radio not responding");
-	  return;
-  }
-  
-  radio.setPALevel(RF24_PA_MAX);
-  radio.setDataRate(RF24_1MBPS);
-  radio.setRetries(5, 5);
-
-  radio.openWritingPipe(writeAddress);
-
-  radio.openReadingPipe(1, readAddress);
-
-  radio.startListening();
-  
-  Serial.print("Data rate: ");
-  Serial.println(radio.getDataRate());
-  Serial.print("Ip Variant: ");
-  Serial.println(radio.isPVariant());
-}
 
 void setup()
 {
   Serial.begin(115200);
   while (!Serial);
 
-  connectToRadio();
-  rfCommandMgr.initialize(&SendMessage); 
+  rfCommandMgr.connectToRadio(readAddress, writeAddress);
 }
 
 void CommandReceived()
@@ -126,10 +101,7 @@ void loop()
 {
     commandMgr.readCommands();
 
-    if (rfCommandMgr.isInitialized())
-    {
-      rfCommandMgr.process();
-    }
+    rfCommandMgr.process();
 
     unsigned long currMillis = millis();
     if (currMillis > nextSend)
