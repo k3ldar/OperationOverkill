@@ -25,5 +25,7 @@ namespace OpOverkillShared.Models
         public decimal Humidity { get; set; }
         
         public bool IsRaining { get; set; }
+
+        public decimal RainSensor { get; set; }
     }
 }
