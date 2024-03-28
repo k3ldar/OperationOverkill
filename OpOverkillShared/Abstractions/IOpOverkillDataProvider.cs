@@ -9,5 +9,9 @@ namespace OpOverkillShared.Abstractions
         bool IsValidDevice(long deviceId);
 
         WeatherStationModel GetWeatherStation(long deviceId);
+
+        void UpdateWeather(long deviceId, WeatherStationModel model);
+
+        TemperatureDataModel GetLatestTemperature(DeviceType deviceType);
     }
 }

@@ -58,6 +58,8 @@ namespace OpOverkillWebServer.Controllers
             model.IsRaining = isRaining;
             model.RainSensor = rainSensor;
 
+            _dataProvider.UpdateWeather(deviceId, model);
+
             return GenerateJsonSuccessResponse();
         }
 
@@ -68,11 +70,8 @@ namespace OpOverkillWebServer.Controllers
             if (!ValidDevice(deviceId))
                 return InvalidDeviceResponse();
 
-            TemperatureDataModel result = new TemperatureDataModel()
-            {
-                Temperature = 12.3m,
-                Humidity = 46.7m
-            };
+            
+            TemperatureDataModel result = _dataProvider.GetLatestTemperature(DeviceType.WeatherStation);
 
             return GenerateJsonSuccessResponse(result);
         }

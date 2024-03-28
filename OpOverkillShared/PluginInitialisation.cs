@@ -17,6 +17,12 @@ namespace OpOverkillShared
         public void AfterConfigure(in IApplicationBuilder app)
         {
             _ = app.ApplicationServices.GetService<ISimpleDBOperations<DevicesDataRow>>();
+            _ = app.ApplicationServices.GetService<ISimpleDBOperations<DailyWeatherDataRow>>();
+            _ = app.ApplicationServices.GetService<ISimpleDBOperations<HourWeatherDataRow>>();
+            _ = app.ApplicationServices.GetService<ISimpleDBOperations<MinuteWeatherDataRow>>();
+
+            // start thread
+            _ = app.ApplicationServices.GetService<IOpOverkillDataProvider>();
         }
 
         public void AfterConfigureServices(in IServiceCollection services)
@@ -32,6 +38,9 @@ namespace OpOverkillShared
         public void BeforeConfigureServices(in IServiceCollection services)
         {
             services.AddSingleton(typeof(TableRowDefinition), typeof(DevicesDataRow));
+            services.AddSingleton(typeof(TableRowDefinition), typeof(DailyWeatherDataRow));
+            services.AddSingleton(typeof(TableRowDefinition), typeof(HourWeatherDataRow));
+            services.AddSingleton(typeof(TableRowDefinition), typeof(MinuteWeatherDataRow));
         }
 
         public void Configure(in IApplicationBuilder app)
