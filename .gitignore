@@ -398,3 +398,4 @@ FodyWeavers.xsd
 *.sln.iml
 /db/
 /Arduino/WeatherStation/arduino_secrets.h
+/Arduino/WaterPumpSensor/arduino_secrets.h
