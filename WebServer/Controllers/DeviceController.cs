@@ -15,6 +15,8 @@ namespace OpOverkillWebServer.Controllers
     public class DeviceController : BaseController
     {
         private const int ResponseCodeBadRequest = 400;
+        private const int ResponseCodeNotFound = 404;
+
         private readonly IOpOverkillDataProvider _dataProvider;
 
         public DeviceController(IOpOverkillDataProvider dataProvider)
@@ -72,6 +74,9 @@ namespace OpOverkillWebServer.Controllers
 
             
             TemperatureDataModel result = _dataProvider.GetLatestTemperature(DeviceType.WeatherStation);
+
+            if (result == null)
+                return GenerateJsonErrorResponse(ResponseCodeNotFound, "No Data");
 
             return GenerateJsonSuccessResponse(result);
         }

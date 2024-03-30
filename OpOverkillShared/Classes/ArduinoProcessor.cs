@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Net.Http.Headers;
 
+using OpOverkillShared.Abstractions;
 using OpOverkillShared.Classes;
 
 using Shared.Classes;
@@ -93,7 +94,7 @@ namespace OpOverkillShared
             }
         }
 
-        public double Temperature
+        public double TemperatureForcast
         {
             get
             {
@@ -155,7 +156,7 @@ namespace OpOverkillShared
         {
             SensorValue = Convert.ToInt32(parts[2]);
             SensorAverage = Convert.ToInt32(parts[3]);
-            Temperature = Convert.ToDouble(parts[4]);
+            TemperatureForcast = Convert.ToDouble(parts[4]);
             Pump1Active = Convert.ToInt32(parts[5]) != 0;
             Pump2Active = Convert.ToInt32(parts[6]) != 0;
 #if DEBUG

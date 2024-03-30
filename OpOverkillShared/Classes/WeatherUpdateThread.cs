@@ -39,11 +39,11 @@ namespace OpOverkillShared.Classes
                         newWeatherData.LastUpdated = DateTime.UtcNow;
                         _latestJson = newWeatherData;
 
-                        if (_arduinoProcessor.Temperature < -50 &&
+                        if (_arduinoProcessor.TemperatureForcast < -50 &&
                             Double.TryParse(newWeatherData.CurrentData().Temperature_2m.Substring(0, newWeatherData.CurrentData().Temperature_2m.Length - 2), out double temp) &&
                             _arduinoProcessor is ArduinoProcessor arduinoProcessor)
                         {
-                            arduinoProcessor.Temperature = temp;
+                            arduinoProcessor.TemperatureForcast = temp;
                         }
                     }
                 }

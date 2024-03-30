@@ -10,7 +10,7 @@
 
         int SensorAverage { get; }
 
-        double Temperature { get; }
+        double TemperatureForcast { get; }
 
         event EventHandler Pump1ActiveChanged;
 

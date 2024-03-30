@@ -14,6 +14,7 @@ namespace OpOverkillShared.DB
         private readonly ISimpleDBOperations<MinuteWeatherDataRow> _minuteWeather;
         private readonly ISimpleDBOperations<DailyWeatherDataRow> _dailyWeather;
         private readonly Dictionary<long, WeatherStationModel> _weatherStations = new();
+        private WeatherStationModel _latestWeatherStationData;
 
         public OpOverkillDataProvider(ISimpleDBOperations<DevicesDataRow> devices,
             ISimpleDBOperations<DailyWeatherDataRow> dailyWeather,
@@ -29,6 +30,7 @@ namespace OpOverkillShared.DB
             foreach (var device in _devices.Select().Where(d => d.DeviceType == DeviceType.WeatherStation))
             {
                 _weatherStations.Add(device.Id, new WeatherStationModel(device.Id, device.Location, device.IpAddress));
+                _latestWeatherStationData = new(device.Id, device.Location, device.IpAddress);
             }
 
             ThreadManager.ThreadStart(this, "Weather Data Management", ThreadPriority.Normal, true);
@@ -93,6 +95,8 @@ namespace OpOverkillShared.DB
 
         public void UpdateWeather(long deviceId, WeatherStationModel model)
         {
+            _latestWeatherStationData = model;
+
             MinuteWeatherDataRow minuteWeatherDataRow = new MinuteWeatherDataRow()
             {
                 DeviceId = deviceId,
@@ -107,22 +111,15 @@ namespace OpOverkillShared.DB
 
         public TemperatureDataModel GetLatestTemperature(DeviceType deviceType)
         {
-            DevicesDataRow device = _devices.Select(d => d.DeviceType == deviceType).FirstOrDefault();
+            if (_latestWeatherStationData == null)
+                return null;
 
-            if (device == null)
-                return new();
-
-            MinuteWeatherDataRow latestData = _minuteWeather.Select(hw => hw.DeviceId == device.Id).OrderByDescending(o => o.Created).FirstOrDefault();
-
-            if (latestData == null)
-                return new();
-
-            TimeSpan age = DateTime.UtcNow - latestData.Created;
+            TimeSpan age = DateTime.UtcNow - _latestWeatherStationData.Created;
 
             TemperatureDataModel result = new TemperatureDataModel()
             {
-                Temperature = latestData.Temperature,
-                Humidity = latestData.Humidity,
+                Temperature = _latestWeatherStationData.Temperature,
+                Humidity = _latestWeatherStationData.Humidity,
                 AgeMilliSeconds = Convert.ToInt64(age.TotalMilliseconds),
             };
 

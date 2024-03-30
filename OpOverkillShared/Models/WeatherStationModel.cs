@@ -20,12 +20,14 @@ namespace OpOverkillShared.Models
 
         public string IpAddress { get; }
 
-        public decimal Temperature { get; set; }
-        
-        public decimal Humidity { get; set; }
+        public decimal Temperature { get; set; } = -99;
+
+        public decimal Humidity { get; set; } = -99;
         
         public bool IsRaining { get; set; }
 
         public decimal RainSensor { get; set; }
+
+        public DateTime Created { get; } = DateTime.UtcNow;
     }
 }

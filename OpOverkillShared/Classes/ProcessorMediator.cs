@@ -124,7 +124,7 @@ namespace OpOverkillShared
 
         private void ArduinoProcessor_SensorTemperatureChanged(object sender, EventArgs e)
         {
-            _logger.AddToLog(PluginManager.LogLevel.Information, $"Temperature Changed: {_arduinoProcessor.Temperature}");
+            _logger.AddToLog(PluginManager.LogLevel.Information, $"Temperature Changed: {_arduinoProcessor.TemperatureForcast}");
         }
 
         private void ArduinoProcessor_SensorAverageValueChanged(object sender, EventArgs e)
