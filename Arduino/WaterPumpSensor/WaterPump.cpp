@@ -29,9 +29,9 @@ WaterPump::~WaterPump()
 	delete(_queue);
 }
  
-void WaterPump::initialize(SendMessageCallback *_sendMessageCallback)
+void WaterPump::initialize(SendMessageCallback *sendMessageCallback)
 {
-	_sendMessageCallback = _sendMessageCallback;
+	_sendMessageCallback = sendMessageCallback;
 	_currentTemperature = TemperatureInitialValue;
 	pinMode(_sensorActivePin, OUTPUT);
 	pinMode(_sensorActiveLEDPin, OUTPUT);
@@ -46,7 +46,6 @@ void WaterPump::initialize(SendMessageCallback *_sendMessageCallback)
 	digitalWrite(_pump2LEDPin, LOW);
 	digitalWrite(_pump1Pin, LOW);
 	digitalWrite(_pump2Pin, LOW);
-
 }
 
 double WaterPump::temperatureGet()
@@ -58,31 +57,31 @@ void WaterPump::temperatureSet(double temperature)
 {
 	if (_currentTemperature != temperature)
 	{
-		_currentTemperature = temperature;
+		_currentTemperature = temperature < MinimumWorkingTemperature ? TemperatureNotSet : temperature;
 		_nextTemperatureCheck = millis() + ValidTemperatureLength;
 	}
 }
 
-void WaterPump::process()
+void WaterPump::process(unsigned long currMillis)
 {
-    unsigned long currTime = millis();
-	
-	if (currTime > _nextTemperatureCheck)
+	if (currMillis > _nextTemperatureCheck)
 	{
 		_sendMessageCallback("Temperature not set", Debug);
 		temperatureSet(TemperatureNotSet);
+        turnPump1Off();
+        turnPump2Off();
 	}
 	
     bool validateSensor = false;
     
-    if (currTime - _myTime > ReadSensorMs)
+    if (currMillis - _myTime > ReadSensorMs)
         validateSensor = true;
 	
 	if (validateSensor)
     {
-        _myTime = currTime;
+        _myTime = currMillis;
 		_sendMessageCallback("Validating Sensor Value", Debug);
-    /*
+    
         int s1Value = getSensorValue();
 
         if (_queue->isFull())
@@ -95,22 +94,27 @@ void WaterPump::process()
             _sensorValue = s1Value;
         }
 
-        int average = _queue->average();
+        _sensorAverage = _queue->average();
 
         if (_queue->isFull() && _currentTemperature >= MinimumWorkingTemperature)
         {
-          processPump1(currTime, average);
-          processPump2(currTime, average);
+          processPump1(currMillis, _sensorAverage);
+          processPump2(currMillis, _sensorAverage);
         }
 
+        if (_currentTemperature < MinimumWorkingTemperature && _pump1Active)
+            turnPump1Off();
+
+        if (_currentTemperature < MinimumWorkingTemperature && _pump2Active)
+            turnPump2Off();
+
         String combined = "1/WS/" + String(s1Value) + "/" + 
-          String(average) + "/" +
+          String(_sensorAverage) + "/" +
           String(_currentTemperature) + "/" + 
           String(_pump1Active) + "/" +
           String(_pump2Active);
 
-        _sendMessageCallback(combined, Information);
-*/	
+        _sendMessageCallback(combined, Information);	
     }
 }
 
@@ -207,4 +211,14 @@ void WaterPump::turnPump2Off()
 bool WaterPump::pump2Active()
 {
 	return _pump2Active;
+}
+
+int WaterPump::sensorValue()
+{
+    return _sensorValue;
+}
+
+int WaterPump::sensorAverage()
+{
+    return _sensorAverage;
 }

@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include "Queue.h"
 
-#include "RFCommunicationManager.h"
 #include "Common.h"
 
 #define ReadSensorMs 1000
@@ -26,6 +25,7 @@ private:
 	SendMessageCallback *_sendMessageCallback;
 	int _sensorSignalPin;
 	int _sensorValue;
+    int _sensorAverage;
 	int _sensorActivePin;
 	int _sensorActiveLEDPin;
 	int _pump1LEDPin;
@@ -59,12 +59,14 @@ public:
 			  const int pump2Pin);
 	~WaterPump();
 	
-	void initialize(SendMessageCallback *_sendMessageCallback);
-	void process();
+	void initialize(SendMessageCallback *sendMessageCallback);
+	void process(unsigned long currMillis);
 	bool pump1Active();
 	bool pump2Active();
 	double temperatureGet();
 	void temperatureSet(double temperature);
+    int sensorValue();
+    int sensorAverage();
 };
 
 #endif

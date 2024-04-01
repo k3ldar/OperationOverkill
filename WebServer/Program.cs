@@ -116,7 +116,6 @@ namespace OpOverkill
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.AddHostedService<ArduinoWorkerService>();
                     services.Configure<KestrelServerOptions>(
                         hostContext.Configuration.GetSection("Kestrel"));
                 })

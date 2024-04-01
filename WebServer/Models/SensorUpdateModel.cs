@@ -3,29 +3,32 @@
 using OpOverkillShared;
 using OpOverkillShared.Abstractions;
 using OpOverkillShared.Classes;
+using OpOverkillShared.Models;
 
 namespace OpOverkillWebServer.Models
 {
     public sealed class SensorUpdateModel
     {
-        public SensorUpdateModel(IArduinoProcessor arduinoProcessor, IOpOverkillDataProvider dataProvider)
+        public SensorUpdateModel(IOpOverkillDataProvider dataProvider)
         {
-            if (arduinoProcessor == null)
-                throw new ArgumentNullException(nameof(arduinoProcessor));
-
             if (dataProvider == null)
                 throw new ArgumentNullException(nameof(dataProvider));
 
-            Pump1Active = arduinoProcessor.Pump1Active;
-            Pump2Active = arduinoProcessor.Pump2Active;
-            SensorValue = arduinoProcessor.SensorValue;
-            SensorAverage = arduinoProcessor.SensorAverage;
-            TemperatureForcast = Math.Round(arduinoProcessor.TemperatureForcast, 2);
+            WaterPumpModel waterPump = dataProvider.GetWaterPump();
+            Pump1Active = waterPump.Pump1Active;
+            Pump2Active = waterPump.Pump2Active;
+            SensorValue = waterPump.Value;
+            SensorAverage = waterPump.Average;
+            SensorTemperature = Math.Round(waterPump.Temperature, 1);
+
+            WeatherStationModel weatherStation = dataProvider.GetWeatherStation(-1);
+            Temperature = weatherStation.Temperature;
+            Humidity = weatherStation.Humidity;
 
             Time = DateTime.Now.ToString("HH:mm:ss");
 
             if (WeatherUpdateThread.LatestWeatherData != null)
-                WeatherData = WeatherUpdateThread.LatestWeatherData.CurrentData();
+                WeatherForcast = WeatherUpdateThread.LatestWeatherData.CurrentData();
 
             var actualTemp = dataProvider.GetLatestTemperature(DeviceType.WeatherStation);
             Temperature = Math.Round(actualTemp.Temperature, 1);
@@ -40,7 +43,7 @@ namespace OpOverkillWebServer.Models
 
         public int SensorAverage { get; }
 
-        public double TemperatureForcast { get; }
+        public double SensorTemperature { get; }
 
         public decimal Temperature { get; }
 
@@ -48,6 +51,6 @@ namespace OpOverkillWebServer.Models
 
         public string Time { get; }
 
-        public CurrentWeatherData WeatherData { get; }
+        public CurrentWeatherData WeatherForcast { get; }
     }
 }

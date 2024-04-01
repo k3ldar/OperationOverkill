@@ -20,9 +20,11 @@ namespace OpOverkillShared
             _ = app.ApplicationServices.GetService<ISimpleDBOperations<DailyWeatherDataRow>>();
             _ = app.ApplicationServices.GetService<ISimpleDBOperations<HourWeatherDataRow>>();
             _ = app.ApplicationServices.GetService<ISimpleDBOperations<MinuteWeatherDataRow>>();
+            _ = app.ApplicationServices.GetService<ISimpleDBOperations<WaterPumpDataRow>>();
 
-            // start thread
+            // start threads
             _ = app.ApplicationServices.GetService<IOpOverkillDataProvider>();
+            _ = app.ApplicationServices.GetService<WeatherUpdateThread>();
         }
 
         public void AfterConfigureServices(in IServiceCollection services)
@@ -41,6 +43,7 @@ namespace OpOverkillShared
             services.AddSingleton(typeof(TableRowDefinition), typeof(DailyWeatherDataRow));
             services.AddSingleton(typeof(TableRowDefinition), typeof(HourWeatherDataRow));
             services.AddSingleton(typeof(TableRowDefinition), typeof(MinuteWeatherDataRow));
+            services.AddSingleton(typeof(TableRowDefinition), typeof(WaterPumpDataRow));
         }
 
         public void Configure(in IApplicationBuilder app)
@@ -51,12 +54,10 @@ namespace OpOverkillShared
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<ILogger, Logger>();
-            services.AddSingleton<IArduinoProcessor, ArduinoProcessor>();
-            services.AddTransient<IProcessorMediator, ProcessorMediator>();
-            services.AddSingleton<WindowsComPort>();
             services.AddSingleton<ISettingsProvider, DefaultSettingProvider>();
             services.AddTransient<ApiWrapper>();
             services.AddSingleton<IOpOverkillDataProvider, OpOverkillDataProvider>();
+            services.AddSingleton<WeatherUpdateThread>();
         }
 
         public void Finalise()

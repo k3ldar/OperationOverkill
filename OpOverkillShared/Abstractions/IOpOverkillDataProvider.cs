@@ -13,5 +13,9 @@ namespace OpOverkillShared.Abstractions
         void UpdateWeather(long deviceId, WeatherStationModel model);
 
         TemperatureDataModel GetLatestTemperature(DeviceType deviceType);
+
+        WaterPumpModel GetWaterPump();
+
+        void UpdateWaterPump(long deviceId, WaterPumpModel model);
     }
 }

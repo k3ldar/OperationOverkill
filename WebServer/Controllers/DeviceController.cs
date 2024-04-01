@@ -65,6 +65,27 @@ namespace OpOverkillWebServer.Controllers
             return GenerateJsonSuccessResponse();
         }
 
+        [HttpPost]
+        [Route("/Device/UpdateWaterPump/{deviceId}/{value}/{average}/{temperature}/{pump1Active}/{pump2Active}")]
+        public JsonResult UpdateWaterPump(long deviceId, int value, int average, double temperature, bool pump1Active, bool pump2Active)
+        {
+            if (!ValidDevice(deviceId))
+                return InvalidDeviceResponse();
+
+            WaterPumpModel model = new WaterPumpModel(deviceId)
+            {
+                Temperature = temperature,
+                Value = value,
+                Average = average,
+                Pump1Active = pump1Active,
+                Pump2Active = pump2Active
+            };
+
+            _dataProvider.UpdateWaterPump(deviceId, model);
+
+            return GenerateJsonSuccessResponse();
+        }
+
         [HttpGet]
         [Route("/Device/GetCurrentTemperature/{deviceId}/")]
         public JsonResult GetCurrentTemperature(long deviceId)

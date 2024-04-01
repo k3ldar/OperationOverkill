@@ -134,23 +134,28 @@ let opOverkill = (function () {
         },
 
         updateWaterSensorStatus: function (wsd) {
+            // water sensor
+            that.updateSpan(document.getElementById("spTime"), wsd.Time);
             that.updateSpan(document.getElementById("spPump1"), wsd.Pump1Active);
             that.updateSpan(document.getElementById("spPump2"), wsd.Pump2Active);
             that.updateSpan(document.getElementById("spSensor"), wsd.SensorValue);
             that.updateSpan(document.getElementById("spSensorAverage"), wsd.SensorAverage);
-            that.updateSpan(document.getElementById("spSensorTemperature"), wsd.Temperature);
-            that.updateSpan(document.getElementById("spSensorHumidity"), wsd.Humidity);
-            that.updateSpan(document.getElementById("spTime"), wsd.Time);
+            that.updateSpan(document.getElementById("spSensorTemperature"), wsd.SensorTemperature);
 
-            that.updateSpan(document.getElementById("spTemp"), wsd.WeatherData.Temperature_2m);
-            that.updateSpan(document.getElementById("spHumid"), wsd.WeatherData.Relative_humidity_2m);
-            that.updateSpan(document.getElementById("spDewPoint"), wsd.WeatherData.Dew_point_2m);
-            that.updateSpan(document.getElementById("spPrecipProb"), wsd.WeatherData.Precipitation_probability);
-            that.updateSpan(document.getElementById("spPrecip"), wsd.WeatherData.Precipitation);
-            that.updateSpan(document.getElementById("spRain"), wsd.WeatherData.Rain);
-            that.updateSpan(document.getElementById("spShowers"), wsd.WeatherData.Showers);
-            that.updateSpan(document.getElementById("spWindSpeed"), wsd.WeatherData.WindSpeed);
-            that.updateSpan(document.getElementById("spWindDirection"), wsd.WeatherData.WindDirection);
+            // weather station
+            that.updateSpan(document.getElementById("spWeatherStationTemperature"), wsd.Temperature);
+            that.updateSpan(document.getElementById("spWeatherStationHumidity"), wsd.Humidity);
+
+            // weather forcast
+            that.updateSpan(document.getElementById("spTemp"), wsd.WeatherForcast.Temperature_2m);
+            that.updateSpan(document.getElementById("spHumid"), wsd.WeatherForcast.Relative_humidity_2m);
+            that.updateSpan(document.getElementById("spDewPoint"), wsd.WeatherForcast.Dew_point_2m);
+            that.updateSpan(document.getElementById("spPrecipProb"), wsd.WeatherForcast.Precipitation_probability);
+            that.updateSpan(document.getElementById("spPrecip"), wsd.WeatherForcast.Precipitation);
+            that.updateSpan(document.getElementById("spRain"), wsd.WeatherForcast.Rain);
+            that.updateSpan(document.getElementById("spShowers"), wsd.WeatherForcast.Showers);
+            that.updateSpan(document.getElementById("spWindSpeed"), wsd.WeatherForcast.WindSpeed);
+            that.updateSpan(document.getElementById("spWindDirection"), wsd.WeatherForcast.WindDirection);
         },
 
         updateSpan: function (n, v) {

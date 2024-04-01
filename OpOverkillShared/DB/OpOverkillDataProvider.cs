@@ -13,24 +13,37 @@ namespace OpOverkillShared.DB
         private readonly ISimpleDBOperations<HourWeatherDataRow> _hourWeather;
         private readonly ISimpleDBOperations<MinuteWeatherDataRow> _minuteWeather;
         private readonly ISimpleDBOperations<DailyWeatherDataRow> _dailyWeather;
+        private readonly ISimpleDBOperations<WaterPumpDataRow> _waterPump;
         private readonly Dictionary<long, WeatherStationModel> _weatherStations = new();
+        private readonly Dictionary<long, WaterPumpModel> _waterPumps = new();
+
         private WeatherStationModel _latestWeatherStationData;
+        private WaterPumpModel _latestWaterPumpData;
 
         public OpOverkillDataProvider(ISimpleDBOperations<DevicesDataRow> devices,
             ISimpleDBOperations<DailyWeatherDataRow> dailyWeather,
             ISimpleDBOperations<HourWeatherDataRow> hourWeather,
-            ISimpleDBOperations<MinuteWeatherDataRow> minuteWeather)
+            ISimpleDBOperations<MinuteWeatherDataRow> minuteWeather,
+            ISimpleDBOperations<WaterPumpDataRow> waterPump)
             : base(null, TimeSpan.FromMinutes(1))
         {
             _devices = devices ?? throw new ArgumentNullException(nameof(devices));
             _dailyWeather = dailyWeather ?? throw new ArgumentNullException(nameof(dailyWeather));
             _hourWeather = hourWeather ?? throw new ArgumentNullException(nameof(hourWeather));
             _minuteWeather = minuteWeather ?? throw new ArgumentNullException(nameof(minuteWeather));
+            _waterPump = waterPump ?? throw new ArgumentNullException(nameof(waterPump));
 
-            foreach (var device in _devices.Select().Where(d => d.DeviceType == DeviceType.WeatherStation))
+            foreach (var device in _devices.Select())
             {
-                _weatherStations.Add(device.Id, new WeatherStationModel(device.Id, device.Location, device.IpAddress));
-                _latestWeatherStationData = new(device.Id, device.Location, device.IpAddress);
+                if (device.DeviceType == DeviceType.WeatherStation)
+                {
+                    _weatherStations.Add(device.Id, new WeatherStationModel(device.Id, device.Location, device.IpAddress));
+                    _latestWeatherStationData = new(device.Id, device.Location, device.IpAddress);
+                }
+                else if (device.DeviceType == DeviceType.WaterPump)
+                {
+                    _waterPumps.Add(device.Id, new WaterPumpModel(device.Id));
+                }
             }
 
             ThreadManager.ThreadStart(this, "Weather Data Management", ThreadPriority.Normal, true);
@@ -85,7 +98,7 @@ namespace OpOverkillShared.DB
             if (_weatherStations.TryGetValue(deviceId, out WeatherStationModel weatherStationModel))
                 return weatherStationModel;
 
-            return null;
+            return _latestWeatherStationData ?? new WeatherStationModel(-1, "Unknown", "Invalid");
         }
 
         public bool IsValidDevice(long deviceId)
@@ -95,7 +108,13 @@ namespace OpOverkillShared.DB
 
         public void UpdateWeather(long deviceId, WeatherStationModel model)
         {
-            _latestWeatherStationData = model;
+            _latestWeatherStationData = new WeatherStationModel(model.DeviceId, model.Location, model.IpAddress)
+            {
+                Humidity = model.Humidity,
+                Temperature = model.Temperature,
+                IsRaining = model.IsRaining,
+                RainSensor = model.RainSensor,
+            };
 
             MinuteWeatherDataRow minuteWeatherDataRow = new MinuteWeatherDataRow()
             {
@@ -112,7 +131,7 @@ namespace OpOverkillShared.DB
         public TemperatureDataModel GetLatestTemperature(DeviceType deviceType)
         {
             if (_latestWeatherStationData == null)
-                return null;
+                return new TemperatureDataModel();
 
             TimeSpan age = DateTime.UtcNow - _latestWeatherStationData.Created;
 
@@ -124,6 +143,44 @@ namespace OpOverkillShared.DB
             };
 
             return result;
+        }
+
+        public WaterPumpModel GetWaterPump()
+        {
+            if (_latestWaterPumpData != null)
+                return _latestWaterPumpData;
+
+            _ = _waterPumps.TryGetValue(_devices.Select().FirstOrDefault(d => d.DeviceType == DeviceType.WaterPump)?.Id ?? -1, out WaterPumpModel waterPump);
+            return waterPump ?? new WaterPumpModel(-1);
+        }
+
+        public void UpdateWaterPump(long deviceId, WaterPumpModel model)
+        {
+            if (_latestWaterPumpData == null || model.Pump1Active != _latestWaterPumpData.Pump1Active || model.Pump2Active !=  _latestWaterPumpData.Pump2Active)
+            {
+                WaterPumpDataRow waterPumpDataRow = new WaterPumpDataRow()
+                {
+                    Id = model.DeviceId,
+                    Value = model.Value,
+                    Average = model.Average,
+                    Pump1 = model.Pump1Active,
+                    Pump2 = model.Pump2Active,
+                    Temperature = model.Temperature,
+                };
+
+                _waterPump.Insert(waterPumpDataRow);
+            }
+
+            _latestWaterPumpData = model;
+
+            if (_waterPumps.TryGetValue(deviceId, out WaterPumpModel waterPump))
+            {
+                waterPump.Temperature = model.Temperature;
+                waterPump.Value = model.Value;
+                waterPump.Average = model.Average;
+                waterPump.Pump1Active = model.Pump1Active;
+                waterPump.Pump2Active = model.Pump2Active;
+            }
         }
 
         #endregion IOpOverkillDataProvider

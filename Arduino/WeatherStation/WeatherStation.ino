@@ -7,15 +7,18 @@
 
 #include <ArduinoJson.h>
 
-bool isStarting = true;
 #define TEMP_SENSOR_PIN 7
 #define RAIN_SENSOR_ANALOG_PIN A0
 
-#define UPDATE_SERVER_MILLISECONDS 10000
+#define UPDATE_SERVER_MILLISECONDS 5000
 
 ///////please enter your sensitive data in the Secret tab/arduino_secrets.h
 char ssid[] = SECRET_SSID;        // your network SSID (name)
 char pass[] = SECRET_PASS;    // your network password (use for WPA, or use as key for WEP)
+
+
+//char server[] = "192.168.8.200";
+//uint16_t port = 80;
 
 char server[] = "192.168.8.201";
 uint16_t port = 7100;
@@ -66,9 +69,10 @@ void setup()
     Serial.begin(230400);
     while (!Serial);
 
+    modem.timeout(500);
+
     webClient.initialize(&SendMessage, 10000, ssid, pass);
     weatherStation.initialize(&SendMessage);
-    isStarting = false;
 }
 
 void loop()
@@ -78,19 +82,22 @@ void loop()
 
     unsigned long currMillis = millis();
 
-    process(currMillis);
-
     webClient.process();
 
     if (DeviceId == -1)
     {
         registerDevice(currMillis);
     }
+    else
+    {
+        process(currMillis);
+    }
+
 
     processFailures();
 
     if (!webClient.getRequestSent() && !webClient.postRequestSent())
-        delay(200);
+        delay(50);
 }
 
 

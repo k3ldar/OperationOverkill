@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 
 using OpOverkillShared;
 using OpOverkillShared.Abstractions;
+using OpOverkillShared.Models;
 
 using SharedPluginFeatures;
 
@@ -10,20 +10,18 @@ namespace OpOverkill.Models
 {
     public class IndexViewModel : BaseModel
     {
-        public IndexViewModel(BaseModelData modelData, IArduinoProcessor arduinoProcessor, IOpOverkillDataProvider dataProvider)
+        public IndexViewModel(BaseModelData modelData, IOpOverkillDataProvider dataProvider)
             : base(modelData)
         {
-            if (arduinoProcessor == null)
-                throw new ArgumentNullException(nameof(arduinoProcessor));
-
             if (dataProvider == null)
                 throw new ArgumentNullException(nameof(dataProvider));
 
-            Pump1Active = arduinoProcessor.Pump1Active;
-            Pump2Active = arduinoProcessor.Pump2Active;
-            SensorValue = arduinoProcessor.SensorValue;
-            SensorAverage = arduinoProcessor.SensorAverage;
-            TemperatureForcast = arduinoProcessor.TemperatureForcast;
+            WaterPumpModel waterPumpModel = dataProvider.GetWaterPump();
+            Pump1Active = waterPumpModel.Pump1Active;
+            Pump2Active = waterPumpModel.Pump2Active;
+            SensorValue = waterPumpModel.Value;
+            SensorAverage = waterPumpModel.Average;
+            TemperatureForcast = waterPumpModel.Temperature;
 
             var actualTemp = dataProvider.GetLatestTemperature(DeviceType.WeatherStation);
             Temperature = Math.Round(actualTemp.Temperature, 1);
