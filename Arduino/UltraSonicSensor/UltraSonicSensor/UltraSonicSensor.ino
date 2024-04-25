@@ -1,127 +1,43 @@
-//#include "Common.h"
+#include "Common.h"
 
-void(* resetFunc) (void) = 0;
+#include <HCSR04.h>
 
-
-#include <Arduino_LED_Matrix.h>
-#include "WebClientManager.h"
-#include "arduino_secrets.h" 
+//#include "WebClientManager.h"
+//#include "arduino_secrets.h" 
 #include "SerialCommandManager.h"
-#include "WeatherStation.h"
+//#include "WeatherStation.h"
 
-#include <ArduinoJson.h>
+//#include <ArduinoJson.h>
 
 #define TEMP_SENSOR_PIN 7
 #define RAIN_SENSOR_ANALOG_PIN A0
+#define BUZZER_PIN 10
 
 #define UPDATE_SERVER_MILLISECONDS 5000
-#define FAIL_REPORTING_MS 1000
 
 ///////please enter your sensitive data in the Secret tab/arduino_secrets.h
-char ssid[] = SECRET_SSID;        // your network SSID (name)
-char pass[] = SECRET_PASS;    // your network password (use for WPA, or use as key for WEP)
+//char ssid[] = SECRET_SSID;        // your network SSID (name)
+//char pass[] = SECRET_PASS;    // your network password (use for WPA, or use as key for WEP)
 
 
 //char server[] = "192.168.8.200";
 //uint16_t port = 80;
 
-char server[] = "192.168.8.201";
-uint16_t port = 7100;
+//char server[] = "192.168.8.201";
+//uint16_t port = 7100;
 
 long DeviceId = -1;
 
-WebClientManager webClient;
+HCSR04 hc(2, 3);
+//WebClientManager webClient;
 SerialCommandManager commandMgr(&CommandReceived, '\n', ':', '=', 500, 256);
-WeatherStation weatherStation(TEMP_SENSOR_PIN, RAIN_SENSOR_ANALOG_PIN);
-ArduinoLEDMatrix matrix;
+//WeatherStation weatherStation(TEMP_SENSOR_PIN, RAIN_SENSOR_ANALOG_PIN);
 
-unsigned long _nextSendUpdate = 0;
-unsigned long _lastFailureMessageSent = 0;
-
-unsigned long _nextLedUpdate = 0;
-
-byte ledFrame[8][12] = {
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-};
-long rssiRate[8] = { -20, -30, -40, -50, -60, -65, -70, -80};
-
-void UpdateConnectedState()
-{
-    int status = webClient.getWiFiStatus();
-
-    if (status == WL_CONNECTED)
-    {
-        for (int i = 3; i < 9; i++)
-        {
-            ledFrame[6][i] = 1;
-            ledFrame[7][i] = 1;
-        }
-
-    }
-    else if (status == WL_CONNECTING)
-    {
-        for (int i = 3; i < 9; i++)
-        {
-            ledFrame[7][i] = 1;
-        }
-    }
-    else 
-    {
-        for (int i = 3; i < 9; i++)
-        {
-            ledFrame[6][i] = 0;
-            ledFrame[7][i] = 0;
-        }
-    }
-}
-
-void UpdateFailureCount(int failures)
-{
-    for (int i = 3; i < 8; i++)
-        ledFrame[0][i] = (failures + 3) > i ? 1 : 0;
-}
-void UpdateWebCommunication(bool isSending)
-{
-    for (int i = 0; i < 8; i++)
-        ledFrame[i][11] = isSending ? 1 : 0;
-}
-
-void UpdateSignalStrength()
-{
-    long rssi = webClient.getRssi();
-
-    for (int i = 0; i < 8; i++)
-        ledFrame[i][0] = rssiRate[i] < rssi ? 1 : 0;
-
-    if (rssi == 0)
-    {
-        ledFrame[1][0] = 0;
-        ledFrame[3][0] = 0;
-        ledFrame[5][0] = 0;
-        ledFrame[7][0] = 0;
-    }
-}
-
-void ProcessLedMatrix(unsigned long currMillis)
-{
-    int failures = webClient.socketConnectFailures();
-    UpdateFailureCount(failures);
-
-    if (currMillis > _nextLedUpdate)
-    {
-        UpdateSignalStrength();
-        UpdateConnectedState();
-        _nextLedUpdate = currMillis + 300;
-    }
-    matrix.renderBitmap(ledFrame, 8, 12);
-}
+//unsigned long _nextSendUpdate = 0;
+unsigned long flipBuzzerState = 0;
+unsigned long nextSr04Measurement = 0;
+unsigned long nextToneChange = 0;
+int currentTone = 0;
 
 void SendMessage(String message, MessageType messageType)
 {
@@ -143,7 +59,7 @@ void CommandReceived()
 {
   if (commandMgr.getCommand() == "WIFI")
   {
-    commandMgr.sendCommand("WIFI", webClient.wifiStatus());
+    //commandMgr.sendCommand("WIFI", webClient.wifiStatus());
     return;
   }
 
@@ -152,54 +68,76 @@ void CommandReceived()
     commandMgr.sendCommand("DID", String(DeviceId));
     return;
   }
-
-  if (commandMgr.getCommand() == "RSSI")
-  {
-    commandMgr.sendCommand("RSSI", String(WiFi.RSSI()));
-    return;
-  }
-
-  if (commandMgr.getCommand() == "WDBG0")
-  {
-    modem.noDebug();
-    return;
-  }
-
-  if (commandMgr.getCommand() == "WDBG1")
-  {
-    modem.debug(Serial, 1);
-    return;
-  }
-
-  if (commandMgr.getCommand() == "WDBG2")
-  {
-    modem.debug(Serial, 2);
-    return;
-  }
 }
+
 
 void setup()
 {
-    Serial.begin(115200);
+    Serial.begin(230400);
     while (!Serial);
-    
-    matrix.begin();
 
-    modem.timeout(500);
+    //modem.timeout(500);
 
-    webClient.initialize(&SendMessage, 10000, ssid, pass);
-    webClient.setTimeout(500);
-    weatherStation.initialize(&SendMessage);
+    //webClient.initialize(&SendMessage, 10000, ssid, pass);
+    //weatherStation.initialize(&SendMessage);
+
+    pinMode(BUZZER_PIN, OUTPUT);
+    digitalWrite(BUZZER_PIN, LOW);
 }
 
 void loop()
 {
     commandMgr.readCommands();
-    weatherStation.process();
+    //weatherStation.process();
 
     unsigned long currMillis = millis();
 
-    webClient.process(currMillis);
+    bool isBuzzerOn = digitalRead(BUZZER_PIN) == HIGH;
+
+    if (currMillis > flipBuzzerState)
+    {
+
+        if (isBuzzerOn == LOW)
+        {
+            //digitalWrite(BUZZER_PIN, HIGH);
+            //Serial.println("Turning buzzer on");
+        }
+        else if (isBuzzerOn == HIGH)
+        {
+            //digitalWrite(BUZZER_PIN, LOW);
+            //Serial.println("Turning buzzer off");
+        }
+
+        flipBuzzerState = currMillis + 50;
+    }
+
+    if (isBuzzerOn && currMillis > nextToneChange)
+    {
+        nextToneChange = currMillis + 800;
+        //UpdateTone();
+    }
+
+    if (currMillis > nextSr04Measurement)
+    {
+        float distance = hc.dist();
+        nextSr04Measurement = currMillis + 100;
+        Serial.print("Distance is: ");
+        Serial.print(distance);
+        Serial.println(" cm");
+
+        if (isBuzzerOn && distance > 50)
+        {
+            digitalWrite(BUZZER_PIN, LOW);
+        }
+        else if (!isBuzzerOn && distance > 0 && distance < 50)
+        {
+            currentTone = 0;
+            digitalWrite(BUZZER_PIN, HIGH);
+        }
+    }
+
+    /*
+    webClient.process();
 
     if (DeviceId == -1)
     {
@@ -210,25 +148,56 @@ void loop()
         process(currMillis);
     }
 
-    bool hasDelay = false;
-    processFailures(currMillis);
 
-    if (webClient.getRequestSent() || webClient.postRequestSent())
-    {
-        UpdateWebCommunication(true);
-    }
-    else
-    {
-        UpdateWebCommunication(false);
-        hasDelay = true;
-    }
+    processFailures();
 
-    ProcessLedMatrix(currMillis);
-
-    if (hasDelay)
+    if (!webClient.getRequestSent() && !webClient.postRequestSent())
         delay(50);
+    */
+
+
 }
 
+void UpdateTone()
+{
+    if (currentTone == 0)
+    {
+        tone(BUZZER_PIN, 440); // A4
+        currentTone = 1;
+    }
+    else if (currentTone == 1)
+    {
+        tone(BUZZER_PIN, 494); // B4
+        currentTone = 2;
+    }
+    else if (currentTone == 2)
+    {
+        tone(BUZZER_PIN, 523); // C4
+        currentTone = 3;
+    }
+    else if (currentTone == 3)
+    {
+        tone(BUZZER_PIN, 587); // D4
+        currentTone = 4;
+    }
+    else if (currentTone == 4)
+    {
+        tone(BUZZER_PIN, 659); // E4
+        currentTone = 5;
+    }
+    else if (currentTone == 5)
+    {
+        tone(BUZZER_PIN, 698); // F4
+        currentTone = 6;
+    }
+    else if (currentTone == 6)
+    {
+        tone(BUZZER_PIN, 784); // G4
+        currentTone = 0;
+    }
+}
+
+/*
 
 void process(unsigned long currMillis)
 {
@@ -277,7 +246,6 @@ void registerDevice(unsigned long currMillis)
                 Serial.print("Device Id: ");
                 Serial.println(DeviceId);
             }
-
         }
         else if (!webClient.getRequestSent())
         {
@@ -288,24 +256,16 @@ void registerDevice(unsigned long currMillis)
     }
 }
 
-void processFailures(unsigned long currMillis)
+void processFailures()
 {
     // not required but reports failure
     int failures = webClient.socketConnectFailures();
 
-    if (failures > 0 && currMillis > _lastFailureMessageSent)
+    if (failures > 0)
     {
-        _lastFailureMessageSent = currMillis + FAIL_REPORTING_MS;
         String failureCount = "Failure Count: ";
         failureCount.concat(failures);
         SendMessage(failureCount, Information);
-    }
-
-    if (webClient.wifiConnectFailures() > 20)
-    {
-        SendMessage("Wifi connect Fail exceeded", Information);
-        //resetFunc();
-        webClient.connectToWiFi();
     }
 }
 
@@ -340,10 +300,9 @@ void updateServer(unsigned long currMillis)
                     _nextSendUpdate = currMillis + UPDATE_SERVER_MILLISECONDS;
             }
         }
-        else if (webClient.canConnectToSocket(currMillis) && !webClient.postRequestSent())
+        else if (!webClient.postRequestSent())
         {
             Serial.println("Sending post request");
-            commandMgr.sendCommand("WIFI", webClient.wifiStatus());
             float temp = weatherStation.getTemperature();
             float humid = weatherStation.getHumidity();
             float rainSensor = weatherStation.getRainSensor();
@@ -358,3 +317,5 @@ void updateServer(unsigned long currMillis)
         Serial.println("Wifi not connected");
     }
 }
+
+*/

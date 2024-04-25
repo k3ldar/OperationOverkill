@@ -36,10 +36,10 @@ void WeatherStation::readDHT11Sensor()
 {
 	_dht11->read(_dht11SensorSignalPin);
 
-	//Serial.print("Humidity: ");
-	//Serial.print(_dht11->humidity);
-	//Serial.print("; Temp: ");
-	//Serial.println(_dht11->temperature);
+	Serial.print("Humidity: ");
+	Serial.print(_dht11->humidity);
+	Serial.print("; Temp: ");
+	Serial.println(_dht11->temperature);
 	_humidity = (float)_dht11->humidity;
 	_tempCelsius = (float)_dht11->temperature;
 	
@@ -48,7 +48,7 @@ void WeatherStation::readDHT11Sensor()
 	tempHum.concat("(C); Humidity: ");
 	tempHum.concat(_humidity);
 	tempHum.concat("%");
-	_sendMessageCallback(tempHum, Debug);
+	_sendMessageCallback(tempHum, Information);
 }
 
 void WeatherStation::readRainSensor()
@@ -60,7 +60,7 @@ void WeatherStation::readRainSensor()
     {
 		String msg = "Rains sensor value: ";
 		msg.concat(_rainSensorValue);
-		_sendMessageCallback(msg, Debug);
+		_sendMessageCallback(msg, Information);
 	}
 }
 

@@ -24,15 +24,19 @@ namespace OpOverkillWebServer.Models
             WeatherStationModel weatherStation = dataProvider.GetWeatherStation(-1);
             Temperature = weatherStation.Temperature;
             Humidity = weatherStation.Humidity;
+            RainSensor = Convert.ToInt32(weatherStation.RainSensor);
+            IsRaining = weatherStation.IsRaining;
 
             Time = DateTime.Now.ToString("HH:mm:ss");
 
             if (WeatherUpdateThread.LatestWeatherData != null)
                 WeatherForcast = WeatherUpdateThread.LatestWeatherData.CurrentData();
 
-            var actualTemp = dataProvider.GetLatestTemperature(DeviceType.WeatherStation);
+            WeatherStationModel actualTemp = dataProvider.GetWeatherStation(-1);
             Temperature = Math.Round(actualTemp.Temperature, 1);
             Humidity = Math.Round(actualTemp.Humidity, 0);
+            RainSensor = Convert.ToInt32(actualTemp.RainSensor);
+            IsRaining = actualTemp.IsRaining;
         }
 
         public bool Pump1Active { get; }
@@ -48,6 +52,10 @@ namespace OpOverkillWebServer.Models
         public decimal Temperature { get; }
 
         public decimal Humidity { get; }
+
+        public int RainSensor { get; }
+
+        public bool IsRaining { get; }
 
         public string Time { get; }
 

@@ -145,6 +145,8 @@ let opOverkill = (function () {
             // weather station
             that.updateSpan(document.getElementById("spWeatherStationTemperature"), wsd.Temperature);
             that.updateSpan(document.getElementById("spWeatherStationHumidity"), wsd.Humidity);
+            that.updateSpan(document.getElementById("spWeatherStationRainSensor"), wsd.RainSensor);
+            that.updateSpan(document.getElementById("spWeatherStationIsRaining"), wsd.IsRaining);
 
             // weather forcast
             that.updateSpan(document.getElementById("spTemp"), wsd.WeatherForcast.Temperature_2m);

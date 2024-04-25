@@ -43,7 +43,7 @@ namespace OpOverkillWebServer.Controllers
 
         [HttpPost]
         [Route("/Device/UpdateWeather/{deviceId}/{temperature}/{humidity}/{rainSensor}/{isRaining}/")]
-        public JsonResult WeatherStationUpdate(long deviceId, decimal temperature, decimal humidity, decimal rainSensor, bool isRaining)
+        public JsonResult WeatherStationUpdate(long deviceId, decimal temperature, decimal humidity, decimal rainSensor, int isRaining)
         {
             if (!ValidDevice(deviceId))
                 return InvalidDeviceResponse();
@@ -57,7 +57,7 @@ namespace OpOverkillWebServer.Controllers
 
             model.Temperature = temperature;
             model.Humidity = humidity;
-            model.IsRaining = isRaining;
+            model.IsRaining = isRaining != 0;
             model.RainSensor = rainSensor;
 
             _dataProvider.UpdateWeather(deviceId, model);
@@ -67,7 +67,7 @@ namespace OpOverkillWebServer.Controllers
 
         [HttpPost]
         [Route("/Device/UpdateWaterPump/{deviceId}/{value}/{average}/{temperature}/{pump1Active}/{pump2Active}")]
-        public JsonResult UpdateWaterPump(long deviceId, int value, int average, double temperature, bool pump1Active, bool pump2Active)
+        public JsonResult UpdateWaterPump(long deviceId, int value, int average, double temperature, int pump1Active, int pump2Active)
         {
             if (!ValidDevice(deviceId))
                 return InvalidDeviceResponse();
@@ -77,8 +77,8 @@ namespace OpOverkillWebServer.Controllers
                 Temperature = temperature,
                 Value = value,
                 Average = average,
-                Pump1Active = pump1Active,
-                Pump2Active = pump2Active
+                Pump1Active = pump1Active != 0,
+                Pump2Active = pump2Active != 0,
             };
 
             _dataProvider.UpdateWaterPump(deviceId, model);

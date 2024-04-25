@@ -1,0 +1,2 @@
+#define SECRET_SSID "H158-381_64B4"
+#define SECRET_PASS "e7MgbAHFLqD"

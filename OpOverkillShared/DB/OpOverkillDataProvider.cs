@@ -95,6 +95,9 @@ namespace OpOverkillShared.DB
 
         public WeatherStationModel GetWeatherStation(long deviceId)
         {
+            if (deviceId == -1)
+                deviceId = _devices.Select().FirstOrDefault(d => d.DeviceType == DeviceType.WeatherStation)?.Id ?? -1;
+
             if (_weatherStations.TryGetValue(deviceId, out WeatherStationModel weatherStationModel))
                 return weatherStationModel;
 
@@ -160,7 +163,7 @@ namespace OpOverkillShared.DB
             {
                 WaterPumpDataRow waterPumpDataRow = new WaterPumpDataRow()
                 {
-                    Id = model.DeviceId,
+                    DeviceId = model.DeviceId,
                     Value = model.Value,
                     Average = model.Average,
                     Pump1 = model.Pump1Active,

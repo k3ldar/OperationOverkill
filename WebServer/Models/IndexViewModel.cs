@@ -23,9 +23,11 @@ namespace OpOverkill.Models
             SensorAverage = waterPumpModel.Average;
             TemperatureForcast = waterPumpModel.Temperature;
 
-            var actualTemp = dataProvider.GetLatestTemperature(DeviceType.WeatherStation);
+            WeatherStationModel actualTemp = dataProvider.GetWeatherStation(-1);
             Temperature = Math.Round(actualTemp.Temperature, 1);
             Humidity = Math.Round(actualTemp.Humidity, 0);
+            RainSensor = Convert.ToInt32(actualTemp.RainSensor);
+            IsRaining = actualTemp.IsRaining;
         }
 
         public bool Pump1Active { get; }
@@ -41,5 +43,9 @@ namespace OpOverkill.Models
         public decimal Temperature { get; }
 
         public decimal Humidity { get; }
+
+        public int RainSensor { get; }
+
+        public bool IsRaining { get; }
     }
 }
