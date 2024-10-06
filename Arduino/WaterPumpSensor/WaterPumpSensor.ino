@@ -5,6 +5,7 @@
 #include "arduino_secrets.h" 
 #include "SerialCommandManager.h"
 
+#include "LedManager.h"
 #include "WaterPump.h"
 
 
@@ -26,18 +27,25 @@
 char ssid[] = SECRET_SSID;        // your network SSID (name)
 char pass[] = SECRET_PASS;    // your network password (use for WPA, or use as key for WEP)
 
-//char server[] = "192.168.8.200";
-//uint16_t port = 80;
+#if defined(RELEASE)
+char server[] = "192.168.8.200";
+uint16_t port = 80;
+#endif
 
+#if defined(DEBUG)
 char server[] = "192.168.8.201";
-uint16_t port = 7100;
+uint16_t port = 7100;gg
+#endif
+
 long DeviceId = -1;
 
 WebClientManager webClient;
 SerialCommandManager commandMgr(&CommandReceived, '\n', ':', '=', 500, 512);
 WaterPump waterPump(WaterSensor_Signal_Pin, WaterSensor_Power_Pin, Sensor_Active_LED_PIN, Relay_1_LED_PIN, Relay_2_LED_PIN, Relay_1_PIN, Relay_2_PIN);
+LedManager ledManager;
 
 unsigned long _nextGetTempUpdate = 0;
+unsigned long _lastFailureMessageSent = 0;
 unsigned long _nextSendUpdate = 0;
 
 void SendMessage(String message, MessageType messageType)
@@ -90,12 +98,14 @@ void CommandReceived()
 
 void setup()
 {
-    Serial.begin(230400);
+    Serial.begin(115200);
     while (!Serial);
   
     modem.timeout(500);
-    webClient.initialize(&SendMessage, 10000, ssid, pass);
+    webClient.initialize(&SendMessage, 10000, ssid, pass, WIFI_FAILURES_FOR_RESTART);
     waterPump.initialize(&SendMessage);
+    ledManager.Initialize();
+    ledManager.StartupSequence();
 }
 
 void loop()
@@ -105,8 +115,10 @@ void loop()
     unsigned long currMillis = millis();
     
     waterPump.process(currMillis);
+    ledManager.SetPumpOne(waterPump.pump1Active());
+    ledManager.SetPumpTwo(waterPump.pump2Active());
 
-    webClient.process();
+    webClient.process(currMillis);
 
     if (DeviceId == -1)
     {
@@ -122,10 +134,13 @@ void loop()
         }
     }
 
-    processFailures();
+    processFailures(currMillis);
 
     if (!webClient.getRequestSent() && !webClient.postRequestSent())
         delay(50);
+
+    
+    ledManager.ProcessLedMatrix(&webClient, currMillis);
 }
 
 void registerDevice(unsigned long currMillis)
@@ -177,19 +192,28 @@ void registerDevice(unsigned long currMillis)
     }
 }
 
-void processFailures()
+void processFailures(unsigned long currMillis)
 {
     // not required but reports failure
     int failures = webClient.socketConnectFailures();
 
-    if (failures > 0)
+    if (failures > 0 && currMillis > _lastFailureMessageSent)
     {
-        String failureCount = "Failure Count: ";
+        _lastFailureMessageSent = currMillis + FAIL_REPORTING_MS;
+        String failureCount = "Socket Failure Count: ";
         failureCount.concat(failures);
         SendMessage(failureCount, Information);
     }
-}
 
+    if (webClient.wifiConnectFailures() >= WIFI_FAILURES_FOR_RESTART || failures >= WIFI_FAILURES_FOR_RESTART)
+    {
+        SendMessage("Wifi/Socket connect Fail exceeded", Error);
+        Serial2.write(RESET_WIFI, sizeof(RESET_WIFI) - 1);
+        ledManager.ShutdownSequence();
+        NVIC_SystemReset();
+        SendMessage("!!!!!!!!!!!!!  this should not appear !!!!!!!!!", Error);
+    }
+}
 
 void getTemperature(unsigned long currMillis)
 {

@@ -1,10 +1,11 @@
-//#include "Common.h"
+#define WEATHER_STATION 
 
-void(* resetFunc) (void) = 0;
+#include "Common.h"
 
-
-#include <Arduino_LED_Matrix.h>
+#include <Arduino.h>
+#include <WiFiS3.h>
 #include "WebClientManager.h"
+#include "LedManager.h"
 #include "arduino_secrets.h" 
 #include "SerialCommandManager.h"
 #include "WeatherStation.h"
@@ -15,113 +16,33 @@ void(* resetFunc) (void) = 0;
 #define RAIN_SENSOR_ANALOG_PIN A0
 
 #define UPDATE_SERVER_MILLISECONDS 5000
-#define FAIL_REPORTING_MS 1000
+
 
 ///////please enter your sensitive data in the Secret tab/arduino_secrets.h
 char ssid[] = SECRET_SSID;        // your network SSID (name)
 char pass[] = SECRET_PASS;    // your network password (use for WPA, or use as key for WEP)
 
-
-//char server[] = "192.168.8.200";
-//uint16_t port = 80;
-
-char server[] = "192.168.8.201";
-uint16_t port = 7100;
+#ifdef DEBUG
+	char server[] = "192.168.8.201";
+	uint16_t port = 7100;
+#endif
+#ifdef RELEASE
+	char server[] = "192.168.8.200";
+	uint16_t port = 80;
+#endif
 
 long DeviceId = -1;
 
 WebClientManager webClient;
 SerialCommandManager commandMgr(&CommandReceived, '\n', ':', '=', 500, 256);
 WeatherStation weatherStation(TEMP_SENSOR_PIN, RAIN_SENSOR_ANALOG_PIN);
-ArduinoLEDMatrix matrix;
+LedManager ledManager;
 
-unsigned long _nextSendUpdate = 0;
 unsigned long _lastFailureMessageSent = 0;
+unsigned long _nextSendUpdate = 0;
 
-unsigned long _nextLedUpdate = 0;
 
-byte ledFrame[8][12] = {
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-};
-long rssiRate[8] = { -20, -30, -40, -50, -60, -65, -70, -80};
 
-void UpdateConnectedState()
-{
-    int status = webClient.getWiFiStatus();
-
-    if (status == WL_CONNECTED)
-    {
-        for (int i = 3; i < 9; i++)
-        {
-            ledFrame[6][i] = 1;
-            ledFrame[7][i] = 1;
-        }
-
-    }
-    else if (status == WL_CONNECTING)
-    {
-        for (int i = 3; i < 9; i++)
-        {
-            ledFrame[7][i] = 1;
-        }
-    }
-    else 
-    {
-        for (int i = 3; i < 9; i++)
-        {
-            ledFrame[6][i] = 0;
-            ledFrame[7][i] = 0;
-        }
-    }
-}
-
-void UpdateFailureCount(int failures)
-{
-    for (int i = 3; i < 8; i++)
-        ledFrame[0][i] = (failures + 3) > i ? 1 : 0;
-}
-void UpdateWebCommunication(bool isSending)
-{
-    for (int i = 0; i < 8; i++)
-        ledFrame[i][11] = isSending ? 1 : 0;
-}
-
-void UpdateSignalStrength()
-{
-    long rssi = webClient.getRssi();
-
-    for (int i = 0; i < 8; i++)
-        ledFrame[i][0] = rssiRate[i] < rssi ? 1 : 0;
-
-    if (rssi == 0)
-    {
-        ledFrame[1][0] = 0;
-        ledFrame[3][0] = 0;
-        ledFrame[5][0] = 0;
-        ledFrame[7][0] = 0;
-    }
-}
-
-void ProcessLedMatrix(unsigned long currMillis)
-{
-    int failures = webClient.socketConnectFailures();
-    UpdateFailureCount(failures);
-
-    if (currMillis > _nextLedUpdate)
-    {
-        UpdateSignalStrength();
-        UpdateConnectedState();
-        _nextLedUpdate = currMillis + 300;
-    }
-    matrix.renderBitmap(ledFrame, 8, 12);
-}
 
 void SendMessage(String message, MessageType messageType)
 {
@@ -176,20 +97,30 @@ void CommandReceived()
     modem.debug(Serial, 2);
     return;
   }
+
+  if (commandMgr.getCommand() == "WCF")
+  {
+    commandMgr.sendCommand("WCF", String(webClient.wifiConnectFailures()));
+    return;
+  }
 }
 
 void setup()
 {
+    delay(200);
     Serial.begin(115200);
     while (!Serial);
     
-    matrix.begin();
+    
 
     modem.timeout(500);
-
-    webClient.initialize(&SendMessage, 10000, ssid, pass);
+    webClient.initialize(&SendMessage, 10000, ssid, pass, WIFI_FAILURES_FOR_RESTART);
     webClient.setTimeout(500);
     weatherStation.initialize(&SendMessage);
+
+    ledManager.Initialize();
+    ledManager.StartupSequence();
+    ledManager.SetIsRaining(false);
 }
 
 void loop()
@@ -210,23 +141,8 @@ void loop()
         process(currMillis);
     }
 
-    bool hasDelay = false;
     processFailures(currMillis);
-
-    if (webClient.getRequestSent() || webClient.postRequestSent())
-    {
-        UpdateWebCommunication(true);
-    }
-    else
-    {
-        UpdateWebCommunication(false);
-        hasDelay = true;
-    }
-
-    ProcessLedMatrix(currMillis);
-
-    if (hasDelay)
-        delay(50);
+    ledManager.ProcessLedMatrix(&webClient, currMillis);
 }
 
 
@@ -251,19 +167,15 @@ void registerDevice(unsigned long currMillis)
             char buffer[bufferSize];
             int bytesRead = webClient.getReadResponse(buffer, bufferSize);
 
-            Serial.print("Data Length: ");
-            Serial.println(bytesRead);
+            String debugMsg = combineStrings("Data Length: %d", bytesRead);
+            SendMessage(debugMsg, Debug);
 
             if (bytesRead > 0)
             {
-                Serial.println(String(buffer, bytesRead));
-
                 JsonResponse response = webClient.htmlParseJsonBody(String(buffer));
                 
-                Serial.print("Json Success: ");
-                Serial.println(response.success);
-                Serial.print("Response Data: ");
-                Serial.println(response.json);
+                String debugMsg = combineStrings("Json Success: %d; Response Data: %s", response.success, String(response.json).c_str());
+                SendMessage(debugMsg, Information);
 
                 if (response.success)
                 {
@@ -271,11 +183,11 @@ void registerDevice(unsigned long currMillis)
                 }
                 else
                 {
-                    Serial.println("Failed to register device");
+                    SendMessage("Failed to register device", Error);
                 }
 
-                Serial.print("Device Id: ");
-                Serial.println(DeviceId);
+                String deviceMsg = combineStrings("Device Id: %ld", DeviceId);
+                SendMessage(deviceMsg, Information);
             }
 
         }
@@ -296,16 +208,18 @@ void processFailures(unsigned long currMillis)
     if (failures > 0 && currMillis > _lastFailureMessageSent)
     {
         _lastFailureMessageSent = currMillis + FAIL_REPORTING_MS;
-        String failureCount = "Failure Count: ";
+        String failureCount = "Socket Failure Count: ";
         failureCount.concat(failures);
         SendMessage(failureCount, Information);
     }
 
-    if (webClient.wifiConnectFailures() > 20)
+    if (webClient.wifiConnectFailures() >= WIFI_FAILURES_FOR_RESTART || failures >= WIFI_FAILURES_FOR_RESTART)
     {
-        SendMessage("Wifi connect Fail exceeded", Information);
-        //resetFunc();
-        webClient.connectToWiFi();
+        SendMessage("Wifi/Socket connect Fail exceeded", Error);
+        Serial2.write(RESET_WIFI, sizeof(RESET_WIFI) - 1);
+        ledManager.ShutdownSequence();
+        NVIC_SystemReset();
+        SendMessage("!!!!!!!!!!!!!  this should not appear !!!!!!!!!", Error);
     }
 }
 
@@ -320,21 +234,17 @@ void updateServer(unsigned long currMillis)
             int bytesRead = 0;
             
             bytesRead = webClient.postReadResponse(buffer, bufferSize);
-            Serial.print("Data Length: ");
-            Serial.println(bytesRead);
+            String debugMsg = combineStrings("Data Length: %d", bytesRead);
+            SendMessage(debugMsg, Debug);
 
             if (bytesRead > 0)
             {
-                Serial.println(String(buffer, bytesRead));
-
                 String data = String(buffer);
 
                 JsonResponse response = webClient.htmlParseJsonBody(data);
-                
-                Serial.print("Json Success: ");
-                Serial.println(response.success);
-                Serial.print("Response Data: ");
-                Serial.println(response.json);
+                               
+                String debugMsg = combineStrings("Json Success: %d; Response Data: %s", response.success, String(response.json).c_str());
+                SendMessage(debugMsg, Information);
 
                 if (response.success)
                     _nextSendUpdate = currMillis + UPDATE_SERVER_MILLISECONDS;
@@ -342,12 +252,15 @@ void updateServer(unsigned long currMillis)
         }
         else if (webClient.canConnectToSocket(currMillis) && !webClient.postRequestSent())
         {
-            Serial.println("Sending post request");
+            SendMessage("Sending post request", Debug);
             commandMgr.sendCommand("WIFI", webClient.wifiStatus());
             float temp = weatherStation.getTemperature();
             float humid = weatherStation.getHumidity();
             float rainSensor = weatherStation.getRainSensor();
-            bool rain = false;
+            bool rain = rainSensor > 200;
+            ledManager.SetIsRaining(rain);
+            ledManager.SetTemperature(temp);
+            ledManager.SetHumidity(humid);
             char tempPath[80];
             sprintf(tempPath, "/Device/UpdateWeather/%ld/%f/%f/%f/%d/", DeviceId, temp, humid, rainSensor, rain);
             webClient.post(currMillis, server, port, tempPath);
@@ -355,6 +268,6 @@ void updateServer(unsigned long currMillis)
     }
     else
     {
-        Serial.println("Wifi not connected");
+        SendMessage("Wifi not connected", Error);
     }
 }

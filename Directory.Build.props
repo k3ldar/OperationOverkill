@@ -27,11 +27,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <FrameWorkLatestVersion>net7.0</FrameWorkLatestVersion>
+    <FrameWorkLatestVersion>net8.0</FrameWorkLatestVersion>
   </PropertyGroup>
 	
   <PropertyGroup>
-    <PluginVersion>5.6.0</PluginVersion>
+    <PluginVersion>5.6.1</PluginVersion>
 	<SharedVer>3.14.0</SharedVer>
 	<SharedWinVer>1.5.0</SharedWinVer>
   </PropertyGroup>

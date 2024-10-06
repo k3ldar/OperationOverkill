@@ -399,3 +399,4 @@ FodyWeavers.xsd
 /db/
 /Arduino/WeatherStation/arduino_secrets.h
 /Arduino/WaterPumpSensor/arduino_secrets.h
+/Arduino/SolarPanelBase/arduino_secrets.h
