@@ -1,6 +1,5 @@
 ﻿using System;
 
-using OpOverkillShared;
 using OpOverkillShared.Abstractions;
 using OpOverkillShared.Models;
 
@@ -28,6 +27,7 @@ namespace OpOverkill.Models
             Humidity = Math.Round(actualTemp.Humidity, 0);
             RainSensor = Convert.ToInt32(actualTemp.RainSensor);
             IsRaining = actualTemp.IsRaining;
+            IsDayTime = actualTemp.DayTime;
         }
 
         public bool Pump1Active { get; }
@@ -47,5 +47,7 @@ namespace OpOverkill.Models
         public int RainSensor { get; }
 
         public bool IsRaining { get; }
+
+        public bool IsDayTime { get; }
     }
 }

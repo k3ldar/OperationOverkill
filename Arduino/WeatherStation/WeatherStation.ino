@@ -12,11 +12,15 @@
 
 #include <ArduinoJson.h>
 
-#define TEMP_SENSOR_PIN 7
+#define NIGHT_TIME_RELAY_PIN D8
+#define TEMP_SENSOR_PIN D7
 #define RAIN_SENSOR_ANALOG_PIN A0
+#define LIGHT_SENSOR_ANALOG_PIN A1
 
 #define UPDATE_SERVER_MILLISECONDS 5000
 
+#define TIME_BETWEEN_LIGHT_PIN_CHANGE_MILLISECONDS 30000
+#define LIGHT_SENSOR_DAYTIME 40
 
 ///////please enter your sensitive data in the Secret tab/arduino_secrets.h
 char ssid[] = SECRET_SSID;        // your network SSID (name)
@@ -35,12 +39,13 @@ long DeviceId = -1;
 
 WebClientManager webClient;
 SerialCommandManager commandMgr(&CommandReceived, '\n', ':', '=', 500, 256);
-WeatherStation weatherStation(TEMP_SENSOR_PIN, RAIN_SENSOR_ANALOG_PIN);
+WeatherStation weatherStation(TEMP_SENSOR_PIN, RAIN_SENSOR_ANALOG_PIN, LIGHT_SENSOR_ANALOG_PIN);
 LedManager ledManager;
 
 unsigned long _lastFailureMessageSent = 0;
 unsigned long _nextSendUpdate = 0;
-
+unsigned long _nextLightPinChange = 0;
+bool _dayTimePinActive = false;
 
 
 
@@ -121,16 +126,17 @@ void setup()
     ledManager.Initialize();
     ledManager.StartupSequence();
     ledManager.SetIsRaining(false);
+    pinMode(NIGHT_TIME_RELAY_PIN, OUTPUT);
 }
 
 void loop()
 {
     commandMgr.readCommands();
     weatherStation.process();
-
     unsigned long currMillis = millis();
 
     webClient.process(currMillis);
+    processLightChange(currMillis);
 
     if (DeviceId == -1)
     {
@@ -145,6 +151,39 @@ void loop()
     ledManager.ProcessLedMatrix(&webClient, currMillis);
 }
 
+unsigned long lastLight = 0;
+void processLightChange(unsigned long currMillis)
+{
+    if (currMillis > lastLight)
+    {
+        lastLight = currMillis + 1000;
+        String current = _dayTimePinActive ? "Daytime" : "Nighttime";
+        Serial.println(current);
+    }
+    if (currMillis > _nextLightPinChange)
+    {
+        bool isDayTime = weatherStation.getLightSensor() < LIGHT_SENSOR_DAYTIME;
+
+        if (isDayTime == _dayTimePinActive)
+        {
+           return;
+        }
+
+        _dayTimePinActive = isDayTime;
+        if (_dayTimePinActive)
+        {
+            Serial.println("Daytime");
+            digitalWrite(NIGHT_TIME_RELAY_PIN, LOW);
+        }
+        else
+        {
+            Serial.println("Nighttime");
+            digitalWrite(NIGHT_TIME_RELAY_PIN, HIGH);
+        }
+
+        _nextLightPinChange = currMillis + TIME_BETWEEN_LIGHT_PIN_CHANGE_MILLISECONDS;
+    }
+}
 
 void process(unsigned long currMillis)
 {
@@ -258,11 +297,12 @@ void updateServer(unsigned long currMillis)
             float humid = weatherStation.getHumidity();
             float rainSensor = weatherStation.getRainSensor();
             bool rain = rainSensor > 200;
+            bool light = weatherStation.getLightSensor() < LIGHT_SENSOR_DAYTIME;
             ledManager.SetIsRaining(rain);
             ledManager.SetTemperature(temp);
             ledManager.SetHumidity(humid);
             char tempPath[80];
-            sprintf(tempPath, "/Device/UpdateWeather/%ld/%f/%f/%f/%d/", DeviceId, temp, humid, rainSensor, rain);
+            sprintf(tempPath, "/Device/UpdateWeather/%ld/%f/%f/%f/%d/%d/", DeviceId, temp, humid, rainSensor, rain, light);
             webClient.post(currMillis, server, port, tempPath);
         }
     }

@@ -117,6 +117,7 @@ namespace OpOverkillShared.DB
                 Temperature = model.Temperature,
                 IsRaining = model.IsRaining,
                 RainSensor = model.RainSensor,
+                DayTime = model.DayTime,
             };
 
             MinuteWeatherDataRow minuteWeatherDataRow = new MinuteWeatherDataRow()
@@ -126,6 +127,7 @@ namespace OpOverkillShared.DB
                 Temperature = model.Temperature,
                 RainSensor = model.RainSensor,
                 IsRaining = model.IsRaining,
+                IsDayTime = model.DayTime,
             };
 
             _minuteWeather.Insert(minuteWeatherDataRow);

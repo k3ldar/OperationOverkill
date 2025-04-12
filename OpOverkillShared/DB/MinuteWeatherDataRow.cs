@@ -10,6 +10,7 @@ namespace OpOverkillShared.DB
         private decimal _humidity;
         private decimal _rainSensor;
         private bool _isRaining;
+        private bool _isDayTime;
 
         [ForeignKey("Devices")]
         public long DeviceId
@@ -78,6 +79,20 @@ namespace OpOverkillShared.DB
                     return;
 
                 _isRaining = value;
+                Update();
+            }
+        }
+
+        public bool IsDayTime
+        {
+            get => _isDayTime;
+
+            set
+            {
+                if (value == _isDayTime)
+                    return;
+
+                _isDayTime = value;
                 Update();
             }
         }
