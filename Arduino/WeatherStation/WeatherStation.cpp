@@ -1,11 +1,13 @@
+#include "api/Common.h"
 #include "WeatherStation.h"
 
-WeatherStation::WeatherStation(int dht11SensorSignalPin, int rainSensorAnalogPin, int lightSensorlPin)
+WeatherStation::WeatherStation(int dht11SensorSignalPin, int rainSensorAnalogPin, int lightSensorDigitalPin)
 {
 	_dht11 = new dht11;
 	_dht11SensorSignalPin = dht11SensorSignalPin;
 	_rainSensorAnalogPin = rainSensorAnalogPin;
-    _lightSensorPin = lightSensorlPin;
+	_lightSensorDigitalPin = lightSensorDigitalPin;
+	pinMode(lightSensorDigitalPin, INPUT);
 	_tempCelsius = -66.0;
     _humidity = -66.0;
 	_nextUpdateTime = millis() + 5000;
@@ -36,10 +38,16 @@ void WeatherStation::process()
 
 void WeatherStation::readLightSensor()
 {
-    int rawLightSensorValue = analogRead(_lightSensorPin);
-    _light = map(rawLightSensorValue, 0, 1023, 0, 100);
-    Serial.print("Light Sensor: ");
-    Serial.println(_light);
+	if (digitalRead(_lightSensorDigitalPin) == LOW)
+	{
+		Serial.println("Digital Light Sensor: ON");
+		_dayTime = true;
+	}
+	else
+	{
+		_dayTime = false;
+		Serial.println("Digital Light Sensor: OFF");
+	}
 }
 
 void WeatherStation::readDHT11Sensor()
@@ -92,8 +100,8 @@ int WeatherStation::getRainSensor()
     return _rainSensorValue;
 }
 
-int WeatherStation::getLightSensor()
+bool WeatherStation::getIsDayTime()
 {
-    return _light;
+    return _dayTime;
 }
 

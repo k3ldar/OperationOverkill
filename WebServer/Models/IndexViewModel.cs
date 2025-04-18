@@ -27,6 +27,7 @@ namespace OpOverkill.Models
             Humidity = Math.Round(actualTemp.Humidity, 0);
             RainSensor = Convert.ToInt32(actualTemp.RainSensor);
             IsRaining = actualTemp.IsRaining;
+            DaySensor = actualTemp.DaySensor;
             IsDayTime = actualTemp.DayTime;
         }
 
@@ -47,6 +48,8 @@ namespace OpOverkill.Models
         public int RainSensor { get; }
 
         public bool IsRaining { get; }
+
+        public int DaySensor { get; }
 
         public bool IsDayTime { get; }
     }

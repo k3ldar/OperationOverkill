@@ -28,6 +28,8 @@ namespace OpOverkillShared.Models
 
         public decimal RainSensor { get; set; }
 
+        public int DaySensor { get; set; }
+
         public bool DayTime { get; set; }
 
         public DateTime Created { get; } = DateTime.UtcNow;

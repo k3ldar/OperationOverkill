@@ -42,8 +42,8 @@ namespace OpOverkillWebServer.Controllers
         }
 
         [HttpPost]
-        [Route("/Device/UpdateWeather/{deviceId}/{temperature}/{humidity}/{rainSensor}/{isRaining}/{light}/")]
-        public JsonResult WeatherStationUpdate(long deviceId, decimal temperature, decimal humidity, decimal rainSensor, int isRaining, int light)
+        [Route("/Device/UpdateWeather/{deviceId}/{temperature}/{humidity}/{rainSensor}/{isRaining}/{lightSensor}/{light}/")]
+        public JsonResult WeatherStationUpdate(long deviceId, decimal temperature, decimal humidity, decimal rainSensor, int isRaining, int lightSensor, int light)
         {
             if (!ValidDevice(deviceId))
                 return InvalidDeviceResponse();
@@ -59,6 +59,7 @@ namespace OpOverkillWebServer.Controllers
             model.Humidity = humidity;
             model.IsRaining = isRaining != 0;
             model.RainSensor = rainSensor;
+            model.DaySensor = lightSensor;
             model.DayTime = light != 0;
 
             _dataProvider.UpdateWeather(deviceId, model);

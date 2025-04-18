@@ -10,6 +10,7 @@ namespace OpOverkillShared.DB
         private decimal _humidity;
         private decimal _rainSensor;
         private bool _isRaining;
+        private int _daySensor;
         private bool _isDayTime;
 
         [ForeignKey("Devices")]
@@ -83,6 +84,19 @@ namespace OpOverkillShared.DB
             }
         }
 
+        public int DaySensor
+        {
+            get => _daySensor;
+
+            set
+            {
+                if (value == _daySensor)
+                    return;
+
+                _daySensor = value;
+                Update();
+            }
+        }
         public bool IsDayTime
         {
             get => _isDayTime;

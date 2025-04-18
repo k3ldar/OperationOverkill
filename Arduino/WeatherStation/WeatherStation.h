@@ -15,10 +15,10 @@ private:
 	int _dht11SensorSignalPin;
 	float _tempCelsius;
     float _humidity;
-    int _light;
+    bool _dayTime;
     int _rainSensorValue;
 	int _rainSensorAnalogPin;
-    int _lightSensorPin;
+	int _lightSensorDigitalPin;
 
 	unsigned long _nextUpdateTime;
 	void readRainSensor();
@@ -27,14 +27,14 @@ private:
 
 	SendMessageCallback *_sendMessageCallback;
 public:
-	WeatherStation(int tempSensorSignalPin, int rainSensorAnalogPin, int lightSensorlPin);
+	WeatherStation(int tempSensorSignalPin, int rainSensorAnalogPin, int lightSensorDigitalPin);
 	~WeatherStation();
 	void initialize(SendMessageCallback *sendMesageCallback);
 	void process();
     float getTemperature();
     float getHumidity();
     int getRainSensor();
-    int getLightSensor();
+    bool getIsDayTime();
 };
 
 

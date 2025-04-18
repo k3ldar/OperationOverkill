@@ -117,16 +117,18 @@ namespace OpOverkillShared.DB
                 Temperature = model.Temperature,
                 IsRaining = model.IsRaining,
                 RainSensor = model.RainSensor,
+                DaySensor = model.DaySensor,
                 DayTime = model.DayTime,
             };
 
-            MinuteWeatherDataRow minuteWeatherDataRow = new MinuteWeatherDataRow()
+            MinuteWeatherDataRow minuteWeatherDataRow = new()
             {
                 DeviceId = deviceId,
                 Humidity = model.Humidity,
                 Temperature = model.Temperature,
                 RainSensor = model.RainSensor,
                 IsRaining = model.IsRaining,
+                DaySensor = model.DaySensor,
                 IsDayTime = model.DayTime,
             };
 
